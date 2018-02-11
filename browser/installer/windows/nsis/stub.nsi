@@ -676,7 +676,7 @@ Function SendPing
       ${If} $R3 == $INSTDIR
         StrCpy $R2 "1" ; This Basilisk install is set as default.
       ${Else}
-        StrCpy $R2 "$R2" "" -11 # length of firefox.exe
+        StrCpy $R2 "$R2" "" -11 # length of basilisk.exe
         ${If} "$R2" == "${FileMainEXE}"
           StrCpy $R2 "2" ; Another Basilisk install is set as default.
         ${Else}
@@ -706,7 +706,7 @@ Function SendPing
             ${If} $R3 == $INSTDIR
               StrCpy $R2 "1" ; This Basilisk install is set as default.
             ${Else}
-              StrCpy $R2 "$R2" "" -11 # length of firefox.exe
+              StrCpy $R2 "$R2" "" -11 # length of basilisk.exe
               ${If} "$R2" == "${FileMainEXE}"
                 StrCpy $R2 "2" ; Another Basilisk install is set as default.
               ${Else}
@@ -1633,7 +1633,7 @@ Function OnDownload
       ; installer closes it we can detect that it has completed.
       Delete "$INSTDIR\install.log"
 
-      ; Delete firefox.exe.moz-upgrade and firefox.exe.moz-delete if it exists
+      ; Delete basilisk.exe.moz-upgrade and basilisk.exe.moz-delete if it exists
       ; since it being present will require an OS restart for the full
       ; installer.
       Delete "$INSTDIR\${FileMainEXE}.moz-upgrade"
