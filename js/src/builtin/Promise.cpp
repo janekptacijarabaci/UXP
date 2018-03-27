@@ -1937,6 +1937,7 @@ PerformPromiseRace(JSContext *cx, JS::ForOfIterator& iterator, HandleObject C,
     MOZ_ASSERT_UNREACHABLE("Shouldn't reach the end of PerformPromiseRace");
 }
 
+
 // ES2016, Sub-steps of 25.4.4.4 and 25.4.4.5.
 static MOZ_MUST_USE bool
 CommonStaticResolveRejectImpl(JSContext* cx, unsigned argc, Value* vp, ResolutionMode mode)
@@ -1998,6 +1999,13 @@ CommonStaticResolveRejectImpl(JSContext* cx, unsigned argc, Value* vp, Resolutio
     // Step 6 of Resolve, 4 of Reject.
     args.rval().setObject(*promise);
     return true;
+}
+
+MOZ_MUST_USE JSObject*
+js::PromiseResolve(JSContext* cx, HandleObject constructor, HandleValue value)
+{
+    RootedValue C(cx, ObjectValue(*constructor));
+    return CommonStaticResolveRejectImpl(cx, C, value, ResolveMode);
 }
 
 /**
@@ -2753,6 +2761,7 @@ CreatePromisePrototype(JSContext* cx, JSProtoKey key)
 static const JSFunctionSpec promise_methods[] = {
     JS_SELF_HOSTED_FN("catch", "Promise_catch", 1, 0),
     JS_FN("then", Promise_then, 2, 0),
+    JS_SELF_HOSTED_FN("finally", "Promise_finally", 1, 0),
     JS_FS_END
 };
 
