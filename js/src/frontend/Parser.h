@@ -985,7 +985,8 @@ class Parser final : private JS::AutoGCRooter, public StrictModeGetter
     JSAtom* stopStringCompression();
 
     Node stringLiteral();
-    Node noSubstitutionTemplate();
+    Node noSubstitutionTaggedTemplate();
+    Node noSubstitutionUntaggedTemplate();
     Node templateLiteral(YieldHandling yieldHandling);
     bool taggedTemplate(YieldHandling yieldHandling, Node nodeList, TokenKind tt);
     bool appendToCallSiteObj(Node callSiteObj);

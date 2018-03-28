@@ -3067,6 +3067,7 @@ BytecodeEmitter::checkSideEffects(ParseNode* pn, bool* answer)
       case PNK_TRUE:
       case PNK_FALSE:
       case PNK_NULL:
+      case PNK_RAW_UNDEFINED:
       case PNK_ELISION:
       case PNK_GENERATOR:
       case PNK_NUMBER:
@@ -6237,6 +6238,9 @@ ParseNode::getConstantValue(ExclusiveContext* cx, AllowConstantObjects allowObje
         return true;
       case PNK_NULL:
         vp.setNull();
+        return true;
+      case PNK_RAW_UNDEFINED:
+        vp.setUndefined();
         return true;
       case PNK_CALLSITEOBJ:
       case PNK_ARRAY: {
@@ -10631,6 +10635,7 @@ BytecodeEmitter::emitTree(ParseNode* pn, EmitLineNumberNote emitLineNote)
       case PNK_TRUE:
       case PNK_FALSE:
       case PNK_NULL:
+      case PNK_RAW_UNDEFINED:
         if (!emit1(pn->getOp()))
             return false;
         break;
