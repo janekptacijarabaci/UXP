@@ -834,13 +834,13 @@ function String_static_trim(string) {
 function String_static_trimLeft(string) {
     if (arguments.length < 1)
         ThrowTypeError(JSMSG_MISSING_FUN_ARG, 0, 'String.trimLeft');
-    return callFunction(std_String_trimLeft, string);
+    return callFunction(std_String_trimStart, string);
 }
 
 function String_static_trimRight(string) {
     if (arguments.length < 1)
         ThrowTypeError(JSMSG_MISSING_FUN_ARG, 0, 'String.trimRight');
-    return callFunction(std_String_trimRight, string);
+    return callFunction(std_String_trimEnd, string);
 }
 
 function String_static_toLocaleLowerCase(string) {
