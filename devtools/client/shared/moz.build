@@ -38,6 +38,7 @@ DevToolsModules(
     'natural-sort.js',
     'network-throttling-profiles.js',
     'node-attribute-parser.js',
+    'open-request-in-tab.js',
     'options-view.js',
     'output-parser.js',
     'poller.js',

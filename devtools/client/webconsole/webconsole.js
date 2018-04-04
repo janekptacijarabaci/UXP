@@ -11,6 +11,7 @@ const {Cc, Ci, Cu} = require("chrome");
 const {Utils: WebConsoleUtils, CONSOLE_WORKER_IDS} =
   require("devtools/client/webconsole/utils");
 const { getSourceNames } = require("devtools/client/shared/source-utils");
+const { openRequestInTab } = require("devtools/client/shared/open-request-in-tab");
 const BrowserLoaderModule = {};
 Cu.import("resource://devtools/client/shared/browser-loader.js", BrowserLoaderModule);
 
@@ -1629,6 +1630,7 @@ WebConsoleFrame.prototype = {
       messageNode.setAttribute("private", true);
     }
     messageNode._connectionId = actorId;
+    messageNode.request = request;
     messageNode.url = request.url;
 
     let body = methodNode.parentNode;
@@ -2795,11 +2797,11 @@ WebConsoleFrame.prototype = {
     let item = this.output.getSelectedMessages(1)[0] ||
                this._contextMenuHandler.lastClickedMessage;
 
-    if (!item || !item.url) {
+    if (!item || !item.request || !item.url) {
       return;
     }
 
-    this.owner.openLink(item.url);
+    openRequestInTab(item.request);
   },
 
   /**

@@ -14,7 +14,9 @@ const { gDevTools } = require("devtools/client/framework/devtools");
  */
 function openRequestInTab(request) {
   let win = Services.wm.getMostRecentWindow(gDevTools.chromeWindowType);
-  let rawData = request.requestPostData ? request.requestPostData.postData : null;
+  let rawData =
+      (request.requestPostData ? request.requestPostData.postData : null)
+      || request.postData || null;
   let postData;
 
   if (rawData && rawData.text) {
