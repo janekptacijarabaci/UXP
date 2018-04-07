@@ -34,10 +34,13 @@ this.QuotaManagerHelper = {
             }
           }
         }
-        var qm = Cc["@mozilla.org/dom/quota/manager;1"].getService(Ci.nsIQuotaManager);
+        var qm = Cc["@mozilla.org/dom/quota-manager-service;1"]
+                 .getService(Ci.nsIQuotaManagerService);
         for (var dom in doms) {
           var uri = Services.io.newURI(dom, null, null);
-          qm.clearStoragesForURI(uri);
+          let principal = Services.scriptSecurityManager
+                          .createCodebasePrincipal(uri, {});
+          qm.clearStoragesForPrincipal(principal);
         }
       }
     } catch(er) {}
