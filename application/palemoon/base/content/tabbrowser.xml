@@ -707,7 +707,7 @@
 
                 let autocomplete = this.mTabBrowser._placesAutocomplete;
                 if (this.mBrowser.registeredOpenURI) {
-                  autocomplete.unregisterOpenPage(this.mBrowser.registeredOpenURI);
+                  autocomplete.unregisterOpenPage(this.mBrowser.registeredOpenURI, 0);
                   delete this.mBrowser.registeredOpenURI;
                 }
                 // Tabs in private windows aren't registered as "Open" so
@@ -715,7 +715,7 @@
                 if (!isBlankPageURL(aLocation.spec) &&
                     (!PrivateBrowsingUtils.isWindowPrivate(window) ||
                     PrivateBrowsingUtils.permanentPrivateBrowsing)) {
-                  autocomplete.registerOpenPage(aLocation);
+                  autocomplete.registerOpenPage(aLocation, 0);
                   this.mBrowser.registeredOpenURI = aLocation;
                 }
               }
@@ -1865,7 +1865,7 @@
             this.mTabListeners[aTab._tPos].destroy();
 
             if (browser.registeredOpenURI && !aTabWillBeMoved) {
-              this._placesAutocomplete.unregisterOpenPage(browser.registeredOpenURI);
+              this._placesAutocomplete.unregisterOpenPage(browser.registeredOpenURI, 0);
               delete browser.registeredOpenURI;
             }
 
@@ -2209,7 +2209,7 @@
           <![CDATA[
             // If the current URI is registered as open remove it from the list.
             if (aOurBrowser.registeredOpenURI) {
-              this._placesAutocomplete.unregisterOpenPage(aOurBrowser.registeredOpenURI);
+              this._placesAutocomplete.unregisterOpenPage(aOurBrowser.registeredOpenURI, 0);
               delete aOurBrowser.registeredOpenURI;
             }
 
@@ -3066,7 +3066,7 @@
           for (var i = 0; i < this.mTabListeners.length; ++i) {
             let browser = this.getBrowserAtIndex(i);
             if (browser.registeredOpenURI) {
-              this._placesAutocomplete.unregisterOpenPage(browser.registeredOpenURI);
+              this._placesAutocomplete.unregisterOpenPage(browser.registeredOpenURI, 0);
               delete browser.registeredOpenURI;
             }
             browser.webProgress.removeProgressListener(this.mTabFilters[i]);
