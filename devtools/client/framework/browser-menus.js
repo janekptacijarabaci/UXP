@@ -284,7 +284,7 @@ function addAllToolsToMenu(doc) {
 
   let amps = doc.getElementById("appmenu_devtools_separator");
   if (amps) {
-    amps.parentNode.insertBefore(fragAppMenuItems, mps);
+    amps.parentNode.insertBefore(fragAppMenuItems, amps);
   }
 
   let mps = doc.getElementById("menu_devtools_separator");
@@ -301,18 +301,28 @@ function addAllToolsToMenu(doc) {
  */
 function addTopLevelItems(doc) {
   let keys = doc.createDocumentFragment();
+  let appmenuItems = doc.createDocumentFragment();
   let menuItems = doc.createDocumentFragment();
 
   let { menuitems } = require("../menus");
   for (let item of menuitems) {
     if (item.separator) {
+      let appseparator = doc.createElement("menuseparator");
+      appseparator.id = "app" + item.id;
       let separator = doc.createElement("menuseparator");
       separator.id = item.id;
+      appmenuItems.appendChild(appseparator);
       menuItems.appendChild(separator);
     } else {
       let { id, l10nKey } = item;
 
       // Create a <menuitem>
+      let appmenuitem = createMenuItem({
+        doc,
+        id: "app" + id,
+        label: l10n(l10nKey + ".label"),
+        isCheckbox: item.checkbox
+      });
       let menuitem = createMenuItem({
         doc,
         id,
@@ -320,7 +330,9 @@ function addTopLevelItems(doc) {
         accesskey: l10n(l10nKey + ".accesskey"),
         isCheckbox: item.checkbox
       });
+      appmenuitem.addEventListener("command", item.oncommand);
       menuitem.addEventListener("command", item.oncommand);
+      appmenuItems.appendChild(appmenuitem);
       menuItems.appendChild(menuitem);
 
       if (item.key && l10nKey) {
@@ -361,6 +373,9 @@ function addTopLevelItems(doc) {
   for (let node of keys.children) {
     nodes.push(node);
   }
+  for (let node of appmenuItems.children) {
+    nodes.push(node);
+  }
   for (let node of menuItems.children) {
     nodes.push(node);
   }
@@ -368,15 +383,27 @@ function addTopLevelItems(doc) {
 
   attachKeybindingsToBrowser(doc, keys);
 
+  let appmenu = doc.getElementById("appmenu_webDeveloper_popup");
+  if (appmenu) {
+    appmenu.appendChild(appmenuItems);
+
+    // There is still "Page Source" menuitem hardcoded into browser.xul. Instead
+    // of manually inserting everything around it, move it to the expected
+    // position.
+    let appmenu_pageSource = doc.getElementById("appmenu_pageSource");
+    let appmenu_endSeparator = doc.getElementById("appmenu_devToolsEndSeparator");
+    appmenu.insertBefore(appmenu_pageSource, appmenu_endSeparator);
+  }
+
   let menu = doc.getElementById("menuWebDeveloperPopup");
   menu.appendChild(menuItems);
 
   // There is still "Page Source" menuitem hardcoded into browser.xul. Instead
   // of manually inserting everything around it, move it to the expected
   // position.
-  let pageSource = doc.getElementById("menu_pageSource");
-  let endSeparator = doc.getElementById("devToolsEndSeparator");
-  menu.insertBefore(pageSource, endSeparator);
+  let menu_pageSource = doc.getElementById("menu_pageSource");
+  let menu_endSeparator = doc.getElementById("menu_devToolsEndSeparator");
+  menu.insertBefore(menu_pageSource, menu_endSeparator);
 }
 
 /**
