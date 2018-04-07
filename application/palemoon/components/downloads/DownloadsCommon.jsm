@@ -867,9 +867,17 @@ DownloadsDataCtor.prototype = {
 
     // Sort backwards by start time, ensuring that the most recent
     // downloads are added first regardless of their state.
-    let loadedItemsArray = [dataItem
-                            for each (dataItem in this.dataItems)
-                            if (dataItem)];
+    // Tycho:
+    // let loadedItemsArray = [dataItem
+    //                         for each (dataItem in this.dataItems)
+    //                         if (dataItem)];
+    let result = [];
+    for (let [, dataItem] of Iterator(this.dataItems)) {
+      if (dataItem) {
+        result.push(dataItem);
+      }
+    }    
+    let loadedItemsArray = result;
     loadedItemsArray.sort(function(a, b) b.startTime - a.startTime);
     loadedItemsArray.forEach(
       function (dataItem) aView.onDataItemAdded(dataItem, false)
@@ -1129,7 +1137,8 @@ DownloadsDataCtor.prototype = {
         // Multiple downloads have been removed.  Iterate over known downloads
         // and remove those that don't exist anymore.
         DownloadsCommon.log("Multiple downloads were removed.");
-        for each (let dataItem in this.dataItems) {
+        // Tycho: for each (let dataItem in this.dataItems) {
+        for (let [, dataItem] of Iterator(this.dataItems)) {
           if (dataItem) {
             // Bug 449811 - We have to bind to the dataItem because Javascript
             // doesn't do fresh let-bindings per loop iteration.
@@ -2141,7 +2150,8 @@ DownloadsIndicatorDataCtor.prototype = {
   {
     let dataItems = this._isPrivate ? PrivateDownloadsData.dataItems
                                     : DownloadsData.dataItems;
-    for each (let dataItem in dataItems) {
+    // Tycho: for each (let dataItem in dataItems) {
+    for (let [, dataItem] of Iterator(dataItems)) {
       if (dataItem && dataItem.inProgress) {
         yield dataItem;
       }
