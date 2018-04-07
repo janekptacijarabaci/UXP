@@ -70,7 +70,7 @@
 #ifdef GKMEDIAS_SHARED_LIBRARY
 @BINPATH@/@DLL_PREFIX@gkmedias@DLL_SUFFIX@
 #endif
-@BINPATH@/@DLL_PREFIX@mozalloc@DLL_SUFFIX@
+#@BINPATH@/@DLL_PREFIX@mozalloc@DLL_SUFFIX@
 #ifdef MOZ_SHARED_MOZGLUE
 @BINPATH@/@DLL_PREFIX@mozglue@DLL_SUFFIX@
 #endif
@@ -193,7 +193,7 @@
 @RESPATH@/components/chrome.xpt
 @RESPATH@/components/commandhandler.xpt
 @RESPATH@/components/commandlines.xpt
-@RESPATH@/components/compartments.xpt
+#@RESPATH@/components/compartments.xpt
 @RESPATH@/components/composer.xpt
 @RESPATH@/components/content_events.xpt
 @RESPATH@/components/content_html.xpt
@@ -203,7 +203,7 @@
 #endif
 @RESPATH@/components/content_xslt.xpt
 @RESPATH@/components/cookie.xpt
-@RESPATH@/components/devtools_security.xpt
+#@RESPATH@/components/devtools_security.xpt
 @RESPATH@/components/directory.xpt
 @RESPATH@/components/docshell.xpt
 @RESPATH@/components/dom.xpt
@@ -218,10 +218,10 @@
 @RESPATH@/components/dom_bluetooth.xpt
 #endif
 @RESPATH@/components/dom_canvas.xpt
-@RESPATH@/components/dom_alarm.xpt
+#@RESPATH@/components/dom_alarm.xpt
 @RESPATH@/components/dom_core.xpt
 @RESPATH@/components/dom_css.xpt
-@RESPATH@/components/dom_devicestorage.xpt
+#@RESPATH@/components/dom_devicestorage.xpt
 @RESPATH@/components/dom_events.xpt
 @RESPATH@/components/dom_geolocation.xpt
 @RESPATH@/components/dom_media.xpt
@@ -237,14 +237,14 @@
 @RESPATH@/components/dom_settings.xpt
 @RESPATH@/components/dom_permissionsettings.xpt
 @RESPATH@/components/dom_sidebar.xpt
-@RESPATH@/components/dom_cellbroadcast.xpt
-@RESPATH@/components/dom_mobilemessage.xpt
+#@RESPATH@/components/dom_cellbroadcast.xpt
+#@RESPATH@/components/dom_mobilemessage.xpt
 @RESPATH@/components/dom_storage.xpt
 @RESPATH@/components/dom_stylesheets.xpt
-@RESPATH@/components/dom_telephony.xpt
+#@RESPATH@/components/dom_telephony.xpt
 @RESPATH@/components/dom_traversal.xpt
-@RESPATH@/components/dom_tv.xpt
-@RESPATH@/components/dom_voicemail.xpt
+#@RESPATH@/components/dom_tv.xpt
+#@RESPATH@/components/dom_voicemail.xpt
 #ifdef MOZ_WEBSPEECH
 @RESPATH@/components/dom_webspeechrecognition.xpt
 #endif
@@ -253,7 +253,7 @@
 @RESPATH@/components/dom_xpath.xpt
 @RESPATH@/components/dom_xul.xpt
 #ifdef MOZ_GAMEPAD
-@RESPATH@/components/dom_gamepad.xpt
+#@RESPATH@/components/dom_gamepad.xpt
 #endif
 #ifdef MOZ_PAY
 @RESPATH@/components/dom_payment.xpt
@@ -378,8 +378,8 @@
 @RESPATH@/components/telemetry.xpt
 
 ; JavaScript components
-@RESPATH@/components/ChromeNotifications.js
-@RESPATH@/components/ChromeNotifications.manifest
+#@RESPATH@/components/ChromeNotifications.js
+#@RESPATH@/components/ChromeNotifications.manifest
 @RESPATH@/components/ConsoleAPI.manifest
 @RESPATH@/components/ConsoleAPIStorage.js
 @RESPATH@/components/BrowserElementParent.manifest
@@ -450,7 +450,7 @@
 @RESPATH@/components/nsUpdateTimerManager.js
 @RESPATH@/components/addoncompat.manifest
 @RESPATH@/components/multiprocessShims.js
-@RESPATH@/components/remoteTagService.js
+#@RESPATH@/components/remoteTagService.js
 @RESPATH@/components/pluginGlue.manifest
 @RESPATH@/components/ProcessSingleton.manifest
 @RESPATH@/components/MainProcessSingleton.js
@@ -466,9 +466,9 @@
 @RESPATH@/components/toolkitplaces.manifest
 @RESPATH@/components/nsLivemarkService.js
 @RESPATH@/components/nsTaggingService.js
-@RESPATH@/components/nsPlacesAutoComplete.manifest
-@RESPATH@/components/nsPlacesAutoComplete.js
-@RESPATH@/components/UnifiedComplete.manifest
+#@RESPATH@/components/nsPlacesAutoComplete.manifest
+#@RESPATH@/components/nsPlacesAutoComplete.js
+#@RESPATH@/components/UnifiedComplete.manifest
 @RESPATH@/components/UnifiedComplete.js
 @RESPATH@/components/nsPlacesExpiration.js
 @RESPATH@/browser/components/PlacesProtocolHandler.js
@@ -527,13 +527,13 @@
 @RESPATH@/components/nsPrompter.manifest
 @RESPATH@/components/nsPrompter.js
 #ifdef MOZ_DATA_REPORTING
-@RESPATH@/components/DataReporting.manifest
-@RESPATH@/components/DataReportingService.js
+#@RESPATH@/components/DataReporting.manifest
+#@RESPATH@/components/DataReportingService.js
 #endif
 #ifdef MOZ_SERVICES_HEALTHREPORT
-@RESPATH@/components/HealthReportComponents.manifest
-@RESPATH@/browser/components/SelfSupportService.manifest
-@RESPATH@/browser/components/SelfSupportService.js
+#@RESPATH@/components/HealthReportComponents.manifest
+#@RESPATH@/browser/components/SelfSupportService.manifest
+#@RESPATH@/browser/components/SelfSupportService.js
 #endif
 #ifdef MOZ_SERVICES_SYNC
 @RESPATH@/components/SyncComponents.manifest
@@ -553,50 +553,50 @@
 @RESPATH@/components/messageWakeupService.manifest
 @RESPATH@/components/SettingsManager.js
 @RESPATH@/components/SettingsManager.manifest
-@RESPATH@/components/Webapps.js
-@RESPATH@/components/Webapps.manifest
+#@RESPATH@/components/Webapps.js
+#@RESPATH@/components/Webapps.manifest
 @RESPATH@/components/AppsService.js
 @RESPATH@/components/AppsService.manifest
-@RESPATH@/components/nsDOMIdentity.js
-@RESPATH@/components/nsIDService.js
-@RESPATH@/components/Identity.manifest
+#@RESPATH@/components/nsDOMIdentity.js
+#@RESPATH@/components/nsIDService.js
+#@RESPATH@/components/Identity.manifest
 @RESPATH@/components/recording-cmdline.js
 @RESPATH@/components/recording-cmdline.manifest
 @RESPATH@/components/htmlMenuBuilder.js
 @RESPATH@/components/htmlMenuBuilder.manifest
 
-@RESPATH@/components/RequestSync.manifest
-@RESPATH@/components/RequestSyncManager.js
-@RESPATH@/components/RequestSyncScheduler.js
+#@RESPATH@/components/RequestSync.manifest
+#@RESPATH@/components/RequestSyncManager.js
+#@RESPATH@/components/RequestSyncScheduler.js
 
 @RESPATH@/components/PermissionSettings.js
 @RESPATH@/components/PermissionSettings.manifest
-@RESPATH@/components/ContactManager.js
-@RESPATH@/components/ContactManager.manifest
-@RESPATH@/components/PhoneNumberService.js
-@RESPATH@/components/PhoneNumberService.manifest
+#@RESPATH@/components/ContactManager.js
+#@RESPATH@/components/ContactManager.manifest
+#@RESPATH@/components/PhoneNumberService.js
+#@RESPATH@/components/PhoneNumberService.manifest
 @RESPATH@/components/NotificationStorage.js
 @RESPATH@/components/NotificationStorage.manifest
-@RESPATH@/components/AlarmsManager.js
-@RESPATH@/components/AlarmsManager.manifest
+#@RESPATH@/components/AlarmsManager.js
+#@RESPATH@/components/AlarmsManager.manifest
 @RESPATH@/components/Push.js
 @RESPATH@/components/Push.manifest
-@RESPATH@/components/PushServiceLauncher.js
+#@RESPATH@/components/PushServiceLauncher.js
 
 @RESPATH@/components/SlowScriptDebug.manifest
 @RESPATH@/components/SlowScriptDebug.js
 
 #ifndef RELEASE_BUILD
-@RESPATH@/components/InterAppComm.manifest
-@RESPATH@/components/InterAppCommService.js
-@RESPATH@/components/InterAppConnection.js
-@RESPATH@/components/InterAppMessagePort.js
+#@RESPATH@/components/InterAppComm.manifest
+#@RESPATH@/components/InterAppCommService.js
+#@RESPATH@/components/InterAppConnection.js
+#@RESPATH@/components/InterAppMessagePort.js
 #endif
 
-@RESPATH@/components/TCPSocket.js
-@RESPATH@/components/TCPServerSocket.js
-@RESPATH@/components/TCPSocketParentIntermediary.js
-@RESPATH@/components/TCPSocket.manifest
+#@RESPATH@/components/TCPSocket.js
+#@RESPATH@/components/TCPServerSocket.js
+#@RESPATH@/components/TCPSocketParentIntermediary.js
+#@RESPATH@/components/TCPSocket.manifest
 
 #ifdef MOZ_ACTIVITIES
 @RESPATH@/components/SystemMessageCache.js
@@ -624,8 +624,8 @@
 
 @RESPATH@/chrome/marionette@JAREXT@
 @RESPATH@/chrome/marionette.manifest
-@RESPATH@/components/MarionetteComponents.manifest
-@RESPATH@/components/marionettecomponent.js
+#@RESPATH@/components/MarionetteComponents.manifest
+#@RESPATH@/components/marionettecomponent.js
 
 #ifdef MOZ_WEBSPEECH
 @RESPATH@/components/dom_webspeechsynth.xpt
@@ -704,7 +704,7 @@
 @RESPATH@/browser/@PREF_DIR@/palemoon.js
 @RESPATH@/browser/@PREF_DIR@/palemoon-branding.js
 @RESPATH@/greprefs.js
-@RESPATH@/defaults/autoconfig/platform.js
+#@RESPATH@/defaults/autoconfig/platform.js
 @RESPATH@/defaults/autoconfig/prefcalls.js
 @RESPATH@/browser/defaults/profile/prefs.js
 
@@ -799,7 +799,7 @@
 #endif
 @RESPATH@/chrome/pippki@JAREXT@
 @RESPATH@/chrome/pippki.manifest
-@RESPATH@/components/pipboot.xpt
+#@RESPATH@/components/pipboot.xpt
 @RESPATH@/components/pipnss.xpt
 @RESPATH@/components/pippki.xpt
 
@@ -830,9 +830,9 @@ bin/libfreebl_32int64_3.so
 #endif
 #endif
 
-@RESPATH@/components/DataStore.manifest
-@RESPATH@/components/DataStoreImpl.js
-@RESPATH@/components/dom_datastore.xpt
+#@RESPATH@/components/DataStore.manifest
+#@RESPATH@/components/DataStoreImpl.js
+#@RESPATH@/components/dom_datastore.xpt
 
 ; Shutdown Terminator
 @RESPATH@/components/nsTerminatorTelemetry.js

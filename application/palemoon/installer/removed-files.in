@@ -70,9 +70,9 @@
 # causes updates to break badly, see bug 1063052. Removing the toplevel
 # chrome.manifest causes us to use the updated omni.ja.
 #ifndef MOZ_GTK
-  @DIR_MACOS@chrome.manifest
+  #@DIR_MACOS@chrome.manifest
   #ifdef XP_MACOSX
-    @DIR_RESOURCES@chrome.manifest
+    #@DIR_RESOURCES@chrome.manifest
   #endif
 #endif
 
