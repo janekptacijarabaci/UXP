@@ -156,6 +156,12 @@ function createToolMenuElements(toolDefinition, doc) {
     });
   }
 
+  let appmenuitem = createMenuItem({
+    doc,
+    id: "appmenuitem_" + id,
+    label: toolDefinition.menuLabel || toolDefinition.label
+  });
+
   let menuitem = createMenuItem({
     doc,
     id: "menuitem_" + id,
@@ -170,6 +176,7 @@ function createToolMenuElements(toolDefinition, doc) {
 
   return {
     key,
+    appmenuitem,
     menuitem
   };
 }
@@ -186,10 +193,22 @@ function createToolMenuElements(toolDefinition, doc) {
  *        The tool definition after which the tool menu item is to be added.
  */
 function insertToolMenuElements(doc, toolDefinition, prevDef) {
-  let { key, menuitem } = createToolMenuElements(toolDefinition, doc);
+  let { key, appmenuitem, menuitem } = createToolMenuElements(toolDefinition, doc);
 
   if (key) {
     attachKeybindingsToBrowser(doc, key);
+  }
+
+  let amp;
+  if (prevDef) {
+    let menuitem = doc.getElementById("appmenuitem_" + prevDef.id);
+    ref = menuitem && menuitem.nextSibling ? menuitem.nextSibling : null;
+  } else {
+    ref = doc.getElementById("appmenu_devtools_separator");
+  }
+
+  if (ref) {
+    amp.parentNode.insertBefore(menuitem, ref);
   }
 
   let ref;
@@ -220,6 +239,11 @@ function removeToolFromMenu(toolId, doc) {
     key.remove();
   }
 
+  let appmenuitem = doc.getElementById("appmenuitem_" + toolId);
+  if (appmenuitem) {
+    appmenuitem.remove();
+  }
+
   let menuitem = doc.getElementById("menuitem_" + toolId);
   if (menuitem) {
     menuitem.remove();
@@ -235,6 +259,7 @@ exports.removeToolFromMenu = removeToolFromMenu;
  */
 function addAllToolsToMenu(doc) {
   let fragKeys = doc.createDocumentFragment();
+  let fragAppMenuItems = doc.createDocumentFragment();
   let fragMenuItems = doc.createDocumentFragment();
 
   for (let toolDefinition of gDevTools.getToolDefinitionArray()) {
@@ -251,10 +276,16 @@ function addAllToolsToMenu(doc) {
     if (elements.key) {
       fragKeys.appendChild(elements.key);
     }
+    fragAppMenuItems.appendChild(elements.appmenuitem);
     fragMenuItems.appendChild(elements.menuitem);
   }
 
   attachKeybindingsToBrowser(doc, fragKeys);
+
+  let amps = doc.getElementById("appmenu_devtools_separator");
+  if (amps) {
+    amps.parentNode.insertBefore(fragAppMenuItems, mps);
+  }
 
   let mps = doc.getElementById("menu_devtools_separator");
   if (mps) {
