@@ -18,6 +18,25 @@ var gPrivacyPane = {
   _shouldPromptForRestart: true,
 
   /**
+   * Initialize autocomplete to ensure prefs are in sync.
+   */
+  _initAutocomplete: function () {
+    let unifiedCompletePref = false;
+    try {
+      unifiedCompletePref =
+        Services.prefs.getBoolPref("browser.urlbar.unifiedcomplete");
+    } catch (ex) {}
+
+    if (unifiedCompletePref) {
+      Components.classes["@mozilla.org/autocomplete/search;1?name=unifiedcomplete"]
+                .getService(Components.interfaces.mozIPlacesAutoComplete);
+    } else {
+      Components.classes["@mozilla.org/autocomplete/search;1?name=history"]
+                .getService(Components.interfaces.mozIPlacesAutoComplete);
+    }
+  },
+
+  /**
    * Sets up the UI for the number of days of history to keep, and updates the
    * label of the "Clear Now..." button.
    * Also restores the previously selected tab or tab index passed as argument.
@@ -41,6 +60,7 @@ var gPrivacyPane = {
     this.updateHistoryModePane();
     this.updatePrivacyMicroControls();
     this.initAutoStartPrivateBrowsingReverter();
+    this._initAutocomplete();
   },
 
   /**
@@ -333,23 +353,6 @@ var gPrivacyPane = {
   },
 
   // HISTORY
-
-  /**
-   * Read the location bar enabled and suggestion prefs
-   * @return Int value for suggestion menulist
-   */
-  readSuggestionPref: function PPP_readSuggestionPref()
-  {
-    let getVal = function(aPref)
-      document.getElementById("browser.urlbar." + aPref).value;
-
-    // Suggest nothing if autocomplete is not enabled
-    if (!getVal("autocomplete.enabled"))
-      return -1;
-
-    // Bottom 2 bits of default.behavior specify history/bookmark
-    return getVal("default.behavior") & 3;
-  },
 
   /**
    * Update browser.urlbar.autocomplete.enabled when a
