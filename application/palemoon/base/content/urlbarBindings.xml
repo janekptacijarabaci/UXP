@@ -70,6 +70,7 @@
         try {
           if (this._prefs.getBoolPref("unifiedcomplete")) {
             this.setAttribute("autocompletesearch", "unifiedcomplete");
+            this.mSearchNames = null;
           }
         } catch (ex) {}
 
@@ -603,6 +604,7 @@
                 this.setAttribute("autocompletesearch",
                                   useUnifiedComplete ? "unifiedcomplete"
                                                      : "urlinline history");
+                this.mSearchNames = null;
             }
           }
         ]]></body>
