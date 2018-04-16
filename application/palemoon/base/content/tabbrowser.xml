@@ -76,6 +76,10 @@
          Components.classes["@mozilla.org/autocomplete/search;1?name=unifiedcomplete"]
                    .getService(Components.interfaces.mozIPlacesAutoComplete);
       </field>
+      <field name="_unifiedComplete" readonly="true">
+         Components.classes["@mozilla.org/autocomplete/search;1?name=unifiedcomplete"]
+                   .getService(Components.interfaces.mozIPlacesAutoComplete);
+      </field>
       <field name="mTabBox" readonly="true">
         document.getAnonymousElementByAttribute(this, "anonid", "tabbox");
       </field>
@@ -716,9 +720,12 @@
                 }
 
                 let autocomplete = this.mTabBrowser._placesAutocomplete;
+                let unifiedComplete = this.mTabBrowser._unifiedComplete;
                 if (this.mBrowser.registeredOpenURI) {
                   autocomplete.unregisterOpenPage(this.mBrowser.registeredOpenURI,
                                                   this.mBrowser.getAttribute("usercontextid") || 0);
+                  unifiedComplete.unregisterOpenPage(this.mBrowser.registeredOpenURI,
+                                                     this.mBrowser.getAttribute("usercontextid") || 0);
                   delete this.mBrowser.registeredOpenURI;
                 }
                 // Tabs in private windows aren't registered as "Open" so
@@ -728,6 +735,8 @@
                     PrivateBrowsingUtils.permanentPrivateBrowsing)) {
                   autocomplete.registerOpenPage(aLocation,
                                                 this.mBrowser.getAttribute("usercontextid") || 0);
+                  unifiedComplete.registerOpenPage(aLocation,
+                                                   this.mBrowser.getAttribute("usercontextid") || 0);
                   this.mBrowser.registeredOpenURI = aLocation;
                 }
               }
@@ -1892,6 +1901,8 @@
             if (browser.registeredOpenURI && !aTabWillBeMoved) {
               this._placesAutocomplete.unregisterOpenPage(browser.registeredOpenURI,
                                                           browser.getAttribute("usercontextid") || 0);
+              this._unifiedComplete.unregisterOpenPage(browser.registeredOpenURI,
+                                                       browser.getAttribute("usercontextid") || 0);
               delete browser.registeredOpenURI;
             }
 
@@ -2237,6 +2248,8 @@
             if (aOurBrowser.registeredOpenURI) {
               this._placesAutocomplete.unregisterOpenPage(aOurBrowser.registeredOpenURI,
                                                           aOurBrowser.getAttribute("usercontextid") || 0);
+              this._unifiedComplete.unregisterOpenPage(aOurBrowser.registeredOpenURI,
+                                                       aOurBrowser.getAttribute("usercontextid") || 0);
               delete aOurBrowser.registeredOpenURI;
             }
 
@@ -3150,6 +3163,8 @@
             if (browser.registeredOpenURI) {
               this._placesAutocomplete.unregisterOpenPage(browser.registeredOpenURI,
                                                           browser.getAttribute("usercontextid") || 0);
+              this._unifiedComplete.unregisterOpenPage(browser.registeredOpenURI,
+                                                       browser.getAttribute("usercontextid") || 0);
               delete browser.registeredOpenURI;
             }
             browser.webProgress.removeProgressListener(this.mTabFilters[i]);
