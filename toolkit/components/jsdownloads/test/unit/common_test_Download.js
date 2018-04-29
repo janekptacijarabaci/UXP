@@ -298,7 +298,7 @@ add_task(function* test_referrer()
 {
   let sourcePath = "/test_referrer.txt";
   let sourceUrl = httpUrl("test_referrer.txt");
-  let targetPath = getTempFile(TEST_TARGET_FILE_NAME).path;
+  let dataSourceUrl = "data:text/html,<html><body></body></html>";
 
   function cleanup() {
     gHttpServer.registerPathHandler(sourcePath, null);
@@ -311,29 +311,51 @@ add_task(function* test_referrer()
     do_check_true(aRequest.hasHeader("Referer"));
     do_check_eq(aRequest.getHeader("Referer"), TEST_REFERRER_URL);
   });
-  let download = yield Downloads.createDownload({
-    source: { url: sourceUrl, referrer: TEST_REFERRER_URL },
-    target: targetPath,
-  });
-  do_check_eq(download.source.referrer, TEST_REFERRER_URL);
-  yield download.start();
+  let download;
+  if (!gUseLegacySaver) {
+    let targetFile = getTempFile(TEST_TARGET_FILE_NAME);
+    let targetPath = targetFile.path;
 
-  download = yield Downloads.createDownload({
-    source: { url: sourceUrl, referrer: TEST_REFERRER_URL,
-              isPrivate: true },
-    target: targetPath,
-  });
-  do_check_eq(download.source.referrer, TEST_REFERRER_URL);
-  yield download.start();
+    download = await Downloads.createDownload({
+      source: { url: sourceUrl, referrer: TEST_REFERRER_URL },
+      target: targetPath,
+    });
 
-  // Test the download still works for non-HTTP channel with referrer.
-  sourceUrl = "data:text/html,<html><body></body></html>";
-  download = yield Downloads.createDownload({
-    source: { url: sourceUrl, referrer: TEST_REFERRER_URL },
-    target: targetPath,
-  });
-  do_check_eq(download.source.referrer, TEST_REFERRER_URL);
-  yield download.start();
+    do_check_eq(download.source.referrer, TEST_REFERRER_URL);
+    await download.start();
+
+    download = await Downloads.createDownload({
+      source: { url: sourceUrl, referrer: TEST_REFERRER_URL,
+                isPrivate: true },
+      target: targetPath,
+    });
+    do_check_eq(download.source.referrer, TEST_REFERRER_URL);
+    await download.start();
+
+    // Test the download still works for non-HTTP channel with referrer.
+    download = await Downloads.createDownload({
+      source: { url: dataSourceUrl, referrer: TEST_REFERRER_URL },
+      target: targetPath,
+    });
+    do_check_eq(download.source.referrer, TEST_REFERRER_URL);
+    await download.start();
+  } else {
+    download = await promiseStartLegacyDownload(
+      sourceUrl, { referrer: TEST_REFERRER_URL });
+    await promiseDownloadStopped(download);
+    do_check_eq(download.source.referrer, TEST_REFERRER_URL);
+
+    download = await promiseStartLegacyDownload(
+      sourceUrl, { referrer: TEST_REFERRER_URL,
+                   isPrivate: true});
+    await promiseDownloadStopped(download);
+    do_check_eq(download.source.referrer, TEST_REFERRER_URL);
+
+    download = await promiseStartLegacyDownload(
+      dataSourceUrl, { referrer: TEST_REFERRER_URL });
+    await promiseDownloadStopped(download);
+    do_check_eq(download.source.referrer, null);
+  }
 
   cleanup();
 });
