@@ -944,6 +944,13 @@ pref("browser.taskbar.lists.refreshInSeconds", 120);
 #endif
 
 #ifdef MOZ_SERVICES_SYNC
+pref("services.sync.serverURL", "https://pmsync.palemoon.org/sync/index.php/");
+pref("services.sync.userURL", "user/");
+pref("services.sync.miscURL", "misc/");
+pref("services.sync.termsURL", "http://www.palemoon.org/sync/terms.shtml");
+pref("services.sync.privacyURL", "http://www.palemoon.org/sync/privacy.shtml");
+pref("services.sync.statusURL", "https://pmsync.palemoon.org/status/");
+pref("services.sync.syncKeyHelpURL", "http://www.palemoon.org/sync/keyhelp.shtml");
 // Info when outdated sync detected
 pref("services.sync.outdated.url", "http://www.palemoon.org/sync/update/");
 // The sync engines to use.
