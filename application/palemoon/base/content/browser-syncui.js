@@ -58,26 +58,7 @@ var gSyncUI = {
       Services.obs.addObserver(this, topic, true);
     }, this);
 
-    if (gBrowser && Weave.Notifications.notifications.length) {
-      this.initNotifications();
-    }
     this.updateUI();
-  },
-
-  initNotifications: function SUI_initNotifications() {
-    const XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-    let notificationbox = document.createElementNS(XULNS, "notificationbox");
-    notificationbox.id = "sync-notifications";
-    notificationbox.setAttribute("flex", "1");
-
-    let bottombox = document.getElementById("browser-bottombox");
-    bottombox.insertBefore(notificationbox, bottombox.firstChild);
-
-    // Force a style flush to ensure that our binding is attached.
-    notificationbox.clientTop;
-
-    // notificationbox will listen to observers from now on.
-    Services.obs.removeObserver(this, "weave:notification:added");
   },
 
   _wasDelayed: false,
@@ -123,17 +104,31 @@ var gSyncUI = {
   },
 
   onSyncDelay: function SUI_onSyncDelay() {
+    let nb = window.document.getElementById("global-notificationbox");
+
     // basically, we want to just inform users that stuff is going to take a while
     let title = this._stringBundle.GetStringFromName("error.sync.no_node_found.title");
     let description = this._stringBundle.GetStringFromName("error.sync.no_node_found");
-    let buttons = [new Weave.NotificationButton(
-      this._stringBundle.GetStringFromName("error.sync.serverStatusButton.label"),
-      this._stringBundle.GetStringFromName("error.sync.serverStatusButton.accesskey"),
-      function() { gSyncUI.openServerStatus(); return true; }
-    )];
-    let notification = new Weave.Notification(
-      title, description, null, Weave.Notifications.PRIORITY_INFO, buttons);
-    Weave.Notifications.replaceTitle(notification);
+    let buttons = [{
+      label: this._stringBundle.GetStringFromName(
+          "error.sync.serverStatusButton.label"),
+      accessKey: this._stringBundle.GetStringFromName(
+          "error.sync.serverStatusButton.accesskey"),
+      callback: function() {
+        gSyncUI.openServerStatus();
+        return true;
+      }
+    }];
+
+    let fragment = document.createDocumentFragment();
+    let msgNode = document.createTextNode(description);
+    fragment.appendChild(msgNode);
+
+    nb.appendNotification(fragment,
+                          title,
+                          undefined,
+                          nb.PRIORITY_INFO,
+                          buttons);
     this._wasDelayed = true;
   },
 
@@ -148,14 +143,13 @@ var gSyncUI = {
   },
 
   onLoginError: function SUI_onLoginError() {
-    // if login fails, any other notifications are essentially moot
-    Weave.Notifications.removeAll();
-
     // if we haven't set up the client, don't show errors
     if (this._needsSetup()) {
       this.updateUI();
       return;
     }
+
+    let nb = window.document.getElementById("global-notificationbox");
 
     let title = this._stringBundle.GetStringFromName("error.login.title");
 
@@ -173,15 +167,26 @@ var gSyncUI = {
     }
 
     let buttons = [];
-    buttons.push(new Weave.NotificationButton(
-      this._stringBundle.GetStringFromName("error.login.prefs.label"),
-      this._stringBundle.GetStringFromName("error.login.prefs.accesskey"),
-      function() { gSyncUI.openPrefs(); return true; }
-    ));
+    buttons.push({
+      label: this._stringBundle.GetStringFromName(
+          "error.login.prefs.label"),
+      accessKey: this._stringBundle.GetStringFromName(
+          "error.login.prefs.accesskey"),
+      callback: function() {
+        gSyncUI.openPrefs();
+        return true;
+      }
+    });
 
-    let notification = new Weave.Notification(title, description, null,
-                                              Weave.Notifications.PRIORITY_WARNING, buttons);
-    Weave.Notifications.replaceTitle(notification);
+    let fragment = document.createDocumentFragment();
+    let msgNode = document.createTextNode(description);
+    fragment.appendChild(msgNode);
+
+    nb.appendNotification(fragment,
+                          title,
+                          undefined,
+                          nb.PRIORITY_WARNING,
+                          buttons);
     this.updateUI();
   },
 
@@ -194,18 +199,31 @@ var gSyncUI = {
   },
 
   onQuotaNotice: function onQuotaNotice(subject, data) {
+    let nb = window.document.getElementById("global-notificationbox");
+
     let title = this._stringBundle.GetStringFromName("warning.sync.quota.label");
     let description = this._stringBundle.GetStringFromName("warning.sync.quota.description");
     let buttons = [];
-    buttons.push(new Weave.NotificationButton(
-      this._stringBundle.GetStringFromName("error.sync.viewQuotaButton.label"),
-      this._stringBundle.GetStringFromName("error.sync.viewQuotaButton.accesskey"),
-      function() { gSyncUI.openQuotaDialog(); return true; }
-    ));
+    buttons.push({
+      label: this._stringBundle.GetStringFromName(
+          "error.sync.viewQuotaButton.label"),
+      accessKey: this._stringBundle.GetStringFromName(
+          "error.sync.viewQuotaButton.accesskey"),
+      callback: function() {
+        gSyncUI.openQuotaDialog();
+        return true;
+      }
+    });
 
-    let notification = new Weave.Notification(
-      title, description, null, Weave.Notifications.PRIORITY_WARNING, buttons);
-    Weave.Notifications.replaceTitle(notification);
+    let fragment = document.createDocumentFragment();
+    let msgNode = document.createTextNode(description);
+    fragment.appendChild(msgNode);
+
+    nb.appendNotification(fragment,
+                          title,
+                          undefined,
+                          nb.PRIORITY_WARNING,
+                          buttons);
   },
 
   openServerStatus: function () {
@@ -304,7 +322,11 @@ var gSyncUI = {
   },
 
   clearError: function SUI_clearError(errorString) {
-    Weave.Notifications.removeAll(errorString);
+    let nb = window.document.getElementById("global-notificationbox");
+    let n = nb.getNotificationWithValue(errorString);
+    if (n) {
+      nb.removeNotification(n, true);
+    }
     this.updateUI();
   },
 
@@ -322,6 +344,8 @@ var gSyncUI = {
   },
 
   onSyncError: function SUI_onSyncError() {
+    let nb = window.document.getElementById("global-notificationbox");
+
     let title = this._stringBundle.GetStringFromName("error.sync.title");
 
     if (Weave.Status.login != Weave.LOGIN_SUCCEEDED) {
@@ -341,7 +365,7 @@ var gSyncUI = {
       description =
         this._stringBundle.formatStringFromName("error.sync.description", [error], 1);
     }
-    let priority = Weave.Notifications.PRIORITY_WARNING;
+    let priority = nb.PRIORITY_WARNING;
     let buttons = [];
 
     // Check if the client is outdated in some way
@@ -352,50 +376,75 @@ var gSyncUI = {
     if (outdated) {
       description = this._stringBundle.GetStringFromName(
         "error.sync.needUpdate.description");
-      buttons.push(new Weave.NotificationButton(
-        this._stringBundle.GetStringFromName("error.sync.needUpdate.label"),
-        this._stringBundle.GetStringFromName("error.sync.needUpdate.accesskey"),
-        function() {
-          window.openUILinkIn(Services.prefs.getCharPref("services.sync.outdated.url"), "tab");
+      buttons.push({
+        label: this._stringBundle.GetStringFromName(
+            "error.sync.needUpdate.label"),
+        accessKey: this._stringBundle.GetStringFromName(
+            "error.sync.needUpdate.accesskey"),
+        callback: function() {
+          window.openUILinkIn(Services.prefs.getCharPref(
+              "services.sync.outdated.url"), "tab");
           return true;
         }
-      ));
+      });
     }
     else if (Weave.Status.sync == Weave.OVER_QUOTA) {
       description = this._stringBundle.GetStringFromName(
         "error.sync.quota.description");
-      buttons.push(new Weave.NotificationButton(
-        this._stringBundle.GetStringFromName(
+      buttons.push({
+        label: this._stringBundle.GetStringFromName(
           "error.sync.viewQuotaButton.label"),
-        this._stringBundle.GetStringFromName(
+        accessKey: this._stringBundle.GetStringFromName(
           "error.sync.viewQuotaButton.accesskey"),
-        function() { gSyncUI.openQuotaDialog(); return true; } )
-      );
+        callback: function() {
+          gSyncUI.openQuotaDialog();
+          return true;
+        }
+      });
     }
     else if (Weave.Status.enforceBackoff) {
-      priority = Weave.Notifications.PRIORITY_INFO;
-      buttons.push(new Weave.NotificationButton(
-        this._stringBundle.GetStringFromName("error.sync.serverStatusButton.label"),
-        this._stringBundle.GetStringFromName("error.sync.serverStatusButton.accesskey"),
-        function() { gSyncUI.openServerStatus(); return true; }
-      ));
+      priority = nb.PRIORITY_INFO;
+      buttons.push({
+        label: this._stringBundle.GetStringFromName(
+            "error.sync.serverStatusButton.label"),
+        accessKey: this._stringBundle.GetStringFromName(
+            "error.sync.serverStatusButton.accesskey"),
+        callback: function() {
+          gSyncUI.openServerStatus();
+          return true;
+        }
+      });
     }
     else {
-      priority = Weave.Notifications.PRIORITY_INFO;
-      buttons.push(new Weave.NotificationButton(
-        this._stringBundle.GetStringFromName("error.sync.tryAgainButton.label"),
-        this._stringBundle.GetStringFromName("error.sync.tryAgainButton.accesskey"),
-        function() { gSyncUI.doSync(); return true; }
-      ));
+      priority = nb.PRIORITY_INFO;
+      buttons.push({
+        label: this._stringBundle.GetStringFromName(
+            "error.sync.tryAgainButton.label"),
+        accessKey: this._stringBundle.GetStringFromName(
+            "error.sync.tryAgainButton.accesskey"),
+        callback: function() {
+          gSyncUI.doSync();
+          return true;
+        }
+      });
     }
 
-    let notification =
-      new Weave.Notification(title, description, null, priority, buttons);
-    Weave.Notifications.replaceTitle(notification);
+    let fragment = document.createDocumentFragment();
+    let msgNode = document.createTextNode(description);
+    fragment.appendChild(msgNode);
+    nb.appendNotification(fragment,
+                          title,
+                          undefined,
+                          priority,
+                          buttons);
 
     if (this._wasDelayed && Weave.Status.sync != Weave.NO_SYNC_NODE_FOUND) {
       title = this._stringBundle.GetStringFromName("error.sync.no_node_found.title");
-      Weave.Notifications.removeAll(title);
+      let nb = window.document.getElementById("global-notificationbox");
+      let n = nb.getNotificationWithValue(title);
+      if (n) {
+        nb.removeNotification(n, true);
+      }
       this._wasDelayed = false;
     }
 
@@ -434,6 +483,7 @@ var gSyncUI = {
         this.onLoginFinish();
         break;
       case "weave:ui:login:error":
+      case "weave:service:login:error":
         this.onLoginError();
         break;
       case "weave:service:logout:finish":
@@ -444,12 +494,6 @@ var gSyncUI = {
         break;
       case "weave:service:ready":
         this.initUI();
-        break;
-      case "weave:notification:added":
-        this.initNotifications();
-        break;
-      case "weave:ui:clear-error":
-        this.clearError();
         break;
     }
   },
