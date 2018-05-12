@@ -10,6 +10,7 @@ var gSyncUI = {
          "weave:service:setup-complete",
          "weave:service:login:start",
          "weave:service:login:finish",
+         "weave:service:login:error",
          "weave:service:logout:finish",
          "weave:service:start-over",
          "weave:ui:login:error",
