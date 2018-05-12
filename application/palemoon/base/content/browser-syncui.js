@@ -315,7 +315,8 @@ var gSyncUI = {
     }
 
     // Show the day-of-week and time (HH:MM) of last sync
-    let lastSyncDate = new Date(lastSync).toLocaleFormat("%a %H:%M");
+    let lastSyncDate = new Date(lastSync).toLocaleDateString(undefined,
+        {weekday: 'long', hour: 'numeric', minute: 'numeric'});
     let lastSyncLabel =
       this._stringBundle.formatStringFromName("lastSync2.label", [lastSyncDate], 1);
 
