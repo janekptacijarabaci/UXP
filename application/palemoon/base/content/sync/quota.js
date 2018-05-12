@@ -193,7 +193,10 @@ var gUsageTreeView = {
       return;
     }
 
-    toremove = [this._byname[coll].title for each (coll in toremove)];
+    // Tycho: toremove = [this._byname[coll].title for each (coll in toremove)];
+    for each (let coll in toremove) {
+      toremove.push(this._byname[coll].title);
+    }
     toremove = toremove.join(gSyncQuota.bundle.getString("quota.list.separator"));
     caption.firstChild.nodeValue = gSyncQuota.bundle.getFormattedString(
       "quota.removal.label", [toremove]);
@@ -208,7 +211,14 @@ var gUsageTreeView = {
    * disabled.
    */
   getEnginesToDisable: function getEnginesToDisable() {
-    return [coll.name for each (coll in this._collections) if (!coll.enabled)];
+    // Tycho: return [coll.name for each (coll in this._collections) if (!coll.enabled)];
+    let engines = [];
+    for each (let coll in this._collections) {
+      if (!coll.enabled) {
+        engines.push(coll.name);
+      }
+    }
+    return engines;
   },
 
   // nsITreeView
