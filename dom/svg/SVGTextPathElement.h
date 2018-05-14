@@ -10,6 +10,7 @@
 #include "nsSVGEnum.h"
 #include "nsSVGLength2.h"
 #include "nsSVGString.h"
+#include "mozilla/dom/SVGAnimatedPathSegList.h"
 #include "mozilla/dom/SVGTextContentElement.h"
 
 class nsIAtom;
@@ -51,6 +52,14 @@ public:
 
   virtual nsresult Clone(mozilla::dom::NodeInfo *aNodeInfo, nsINode **aResult) const override;
 
+  SVGAnimatedPathSegList* GetAnimPathSegList() override {
+    return &mPath;
+  }
+
+  nsIAtom* GetPathDataAttrName() const override {
+    return nsGkAtoms::path;
+  }
+
   // WebIDL
   already_AddRefed<SVGAnimatedLength> StartOffset();
   already_AddRefed<SVGAnimatedEnumeration> Method();
@@ -82,6 +91,8 @@ public:
   enum { HREF, XLINK_HREF };
   nsSVGString mStringAttributes[2];
   static StringInfo sStringInfo[2];
+
+  SVGAnimatedPathSegList mPath;
 };
 
 } // namespace dom

@@ -144,6 +144,12 @@ SVGAnimatedPathSegList::ClearAnimValue(nsSVGElement *aElement)
   aElement->DidAnimatePathSegList();
 }
 
+bool
+SVGAnimatedPathSegList::IsRendered() const
+{
+  return mAnimVal ? !mAnimVal->IsEmpty() : !mBaseVal.IsEmpty();
+}
+
 nsISMILAttr*
 SVGAnimatedPathSegList::ToSMILAttr(nsSVGElement *aElement)
 {
