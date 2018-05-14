@@ -4927,8 +4927,8 @@ SVGTextFrame::DoTextPathLayout()
 
     dom::SVGTextPathElement* textPath =
       static_cast<dom::SVGTextPathElement*>(textPathFrame->GetContent());
-    RefPtr<SVGAnimatedEnumeration> sideEnum = textPath->Side();
-    uint16_t side = sideEnum->AnimVal();
+    uint16_t side =
+      textPath->EnumAttributes()[SVGTextPathElement::SIDE].GetAnimValue();
 
     gfxFloat offset = GetStartOffset(textPathFrame);
     Float pathLength = path->ComputeLength();
