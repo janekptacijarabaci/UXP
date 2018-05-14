@@ -3357,7 +3357,7 @@ SVGTextFrame::MutationObserver::CharacterDataChanged(
 void
 SVGTextFrame::MutationObserver::AttributeChanged(
                                                 nsIDocument* aDocument,
-                                                mozilla::dom::Element* aElement,
+                                                Element* aElement,
                                                 int32_t aNameSpaceID,
                                                 nsIAtom* aAttribute,
                                                 int32_t aModType,
@@ -3875,7 +3875,7 @@ TextRenderedRunFlagsForBBoxContribution(const TextRenderedRun& aRun,
 }
 
 SVGBBox
-SVGTextFrame::GetBBoxContribution(const gfx::Matrix &aToBBoxUserspace,
+SVGTextFrame::GetBBoxContribution(const Matrix &aToBBoxUserspace,
                                   uint32_t aFlags)
 {
   NS_ASSERTION(PrincipalChildList().FirstChild(), "must have a child frame");
@@ -4146,7 +4146,7 @@ SVGTextFrame::GetSubStringLength(nsIContent* aContent,
  */
 int32_t
 SVGTextFrame::GetCharNumAtPosition(nsIContent* aContent,
-                                   mozilla::nsISVGPoint* aPoint)
+                                   nsISVGPoint* aPoint)
 {
   UpdateGlyphPositioning();
 
@@ -4179,7 +4179,7 @@ SVGTextFrame::GetCharNumAtPosition(nsIContent* aContent,
 nsresult
 SVGTextFrame::GetStartPositionOfChar(nsIContent* aContent,
                                      uint32_t aCharNum,
-                                     mozilla::nsISVGPoint** aResult)
+                                     nsISVGPoint** aResult)
 {
   UpdateGlyphPositioning();
 
@@ -4204,7 +4204,7 @@ SVGTextFrame::GetStartPositionOfChar(nsIContent* aContent,
 nsresult
 SVGTextFrame::GetEndPositionOfChar(nsIContent* aContent,
                                    uint32_t aCharNum,
-                                   mozilla::nsISVGPoint** aResult)
+                                   nsISVGPoint** aResult)
 {
   UpdateGlyphPositioning();
 
@@ -4241,7 +4241,7 @@ SVGTextFrame::GetEndPositionOfChar(nsIContent* aContent,
 nsresult
 SVGTextFrame::GetExtentOfChar(nsIContent* aContent,
                               uint32_t aCharNum,
-                              dom::SVGIRect** aResult)
+                              SVGIRect** aResult)
 {
   UpdateGlyphPositioning();
 
@@ -4693,7 +4693,7 @@ ConvertLogicalTextAnchorToPhysical(uint8_t aTextAnchor, bool aIsRightToLeft)
  * @param aAnchorSide The direction to anchor.
  */
 static void
-ShiftAnchoredChunk(nsTArray<mozilla::CharPosition>& aCharPositions,
+ShiftAnchoredChunk(nsTArray<CharPosition>& aCharPositions,
                    uint32_t aChunkStart,
                    uint32_t aChunkEnd,
                    gfxFloat aVisIStartEdge,
@@ -4822,13 +4822,13 @@ SVGTextFrame::GetTextPathPathElement(nsIFrame* aTextPathFrame)
 
   if (!property) {
     nsIContent* content = aTextPathFrame->GetContent();
-    dom::SVGTextPathElement* tp = static_cast<dom::SVGTextPathElement*>(content);
+    SVGTextPathElement* tp = static_cast<SVGTextPathElement*>(content);
     nsAutoString href;
-    if (tp->mStringAttributes[dom::SVGTextPathElement::HREF].IsExplicitlySet()) {
-      tp->mStringAttributes[dom::SVGTextPathElement::HREF]
+    if (tp->mStringAttributes[SVGTextPathElement::HREF].IsExplicitlySet()) {
+      tp->mStringAttributes[SVGTextPathElement::HREF]
         .GetAnimValue(href, tp);
     } else {
-      tp->mStringAttributes[dom::SVGTextPathElement::XLINK_HREF]
+      tp->mStringAttributes[SVGTextPathElement::XLINK_HREF]
         .GetAnimValue(href, tp);
     }
 
@@ -4890,10 +4890,10 @@ SVGTextFrame::GetOffsetScale(nsIFrame* aTextPathFrame)
 gfxFloat
 SVGTextFrame::GetStartOffset(nsIFrame* aTextPathFrame)
 {
-  dom::SVGTextPathElement *tp =
-    static_cast<dom::SVGTextPathElement*>(aTextPathFrame->GetContent());
+  SVGTextPathElement *tp =
+    static_cast<SVGTextPathElement*>(aTextPathFrame->GetContent());
   nsSVGLength2 *length =
-    &tp->mLengthAttributes[dom::SVGTextPathElement::STARTOFFSET];
+    &tp->mLengthAttributes[SVGTextPathElement::STARTOFFSET];
 
   if (length->IsPercentage()) {
     RefPtr<Path> data = GetTextPath(aTextPathFrame);
@@ -4925,8 +4925,8 @@ SVGTextFrame::DoTextPathLayout()
       continue;
     }
 
-    dom::SVGTextPathElement* textPath =
-      static_cast<dom::SVGTextPathElement*>(textPathFrame->GetContent());
+    SVGTextPathElement* textPath =
+      static_cast<SVGTextPathElement*>(textPathFrame->GetContent());
     uint16_t side =
       textPath->EnumAttributes()[SVGTextPathElement::SIDE].GetAnimValue();
 
