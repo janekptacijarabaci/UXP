@@ -43,7 +43,13 @@ nsSVGEnumMapping SVGTextPathElement::sSpacingMap[] = {
   {nullptr, 0}
 };
 
-nsSVGElement::EnumInfo SVGTextPathElement::sEnumInfo[3] =
+nsSVGEnumMapping SVGTextPathElement::sSideMap[] = {
+  {&nsGkAtoms::left, TEXTPATH_SIDETYPE_LEFT},
+  {&nsGkAtoms::right, TEXTPATH_SIDETYPE_RIGHT},
+  {nullptr, 0}
+};
+
+nsSVGElement::EnumInfo SVGTextPathElement::sEnumInfo[4] =
 {
   // from SVGTextContentElement:
   { &nsGkAtoms::lengthAdjust,
@@ -58,6 +64,10 @@ nsSVGElement::EnumInfo SVGTextPathElement::sEnumInfo[3] =
   { &nsGkAtoms::spacing,
     sSpacingMap,
     TEXTPATH_SPACINGTYPE_EXACT
+  },
+  { &nsGkAtoms::side_,
+    sSideMap,
+    TEXTPATH_SIDETYPE_LEFT
   }
 };
 
@@ -106,6 +116,12 @@ already_AddRefed<SVGAnimatedEnumeration>
 SVGTextPathElement::Spacing()
 {
   return mEnumAttributes[SPACING].ToDOMAnimatedEnum(this);
+}
+
+already_AddRefed<SVGAnimatedEnumeration>
+SVGTextPathElement::Side()
+{
+  return mEnumAttributes[SIDE].ToDOMAnimatedEnum(this);
 }
 
 //----------------------------------------------------------------------

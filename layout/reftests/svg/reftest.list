@@ -363,6 +363,7 @@ fuzzy-if(skiaContent,1,340) == stroke-dasharray-03.svg pass.svg
 fuzzy-if(skiaContent,1,610) == textPath-03.svg pass.svg
 == textPath-04.svg pass.svg
 == textPath-05.html pass.svg
+== textPath-side-attribute-01.svg pass.svg
 == text-style-01a.svg text-style-01-ref.svg
 == text-style-01b.svg text-style-01-ref.svg
 == text-style-01c.svg text-style-01-ref.svg
