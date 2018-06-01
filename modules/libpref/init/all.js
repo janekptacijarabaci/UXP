@@ -5327,6 +5327,9 @@ pref("dom.audiochannel.mutedByDefault", false);
 // Enable <details> and <summary> tags.
 pref("dom.details_element.enabled", true);
 
+// HTML <dialog> element
+pref("dom.dialog_element.enabled", false);
+
 // Secure Element API
 #ifdef MOZ_SECUREELEMENT
 pref("dom.secureelement.enabled", false);
