@@ -83,7 +83,7 @@
         type="places"
         context="placesContext"
         hidecolumnpicker="true"
-        onkeypress="SidebarUtils.handleTreeKeyPress(event);"
+        onkeypress="SidebarUtils.handleTreeKeyPress(this, event);"
         onclick="SidebarUtils.handleTreeClick(this, event, true);"
         onmousemove="SidebarUtils.handleTreeMouseMove(event);"
         onmouseout="SidebarUtils.setMouseoverURL('');">

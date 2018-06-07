@@ -61,13 +61,27 @@ var SidebarUtils = {
     }
   },
 
-  handleTreeKeyPress: function SU_handleTreeKeyPress(aEvent) {
+  handleTreeKeyPress: function SU_handleTreeKeyPress(aTree, aEvent) {
     // XXX Bug 627901: Post Fx4, this method should take a tree parameter.
+    let tbo = aTree.treeBoxObject;
     let tree = aEvent.target;
     let node = tree.selectedNode;
     if (node) {
-      if (aEvent.keyCode == KeyEvent.DOM_VK_RETURN)
+      if (aEvent.keyCode == KeyEvent.DOM_VK_RETURN) {
         PlacesUIUtils.openNodeWithEvent(node, aEvent, tree);
+      }
+      if ((aEvent.keyCode ==
+          (aEvent.ctrlKey && KeyEvent.DOM_VK_BACK_SPACE)) &&
+          (node.parent && PlacesUtils.nodeIsContainer(node.parent))) {
+        let currentIndex = tbo.view.selection.currentIndex;
+        if (currentIndex >= 0) {
+          let parentIndex = tbo.view.getParentIndex(currentIndex);
+          if (parentIndex >= 0) {
+            tbo.ensureRowIsVisible(parentIndex);
+            tbo.view.selection.select(parentIndex);
+          }
+        }
+      }
     }
   },
 

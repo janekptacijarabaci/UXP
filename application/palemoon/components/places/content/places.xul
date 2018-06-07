@@ -336,6 +336,7 @@
           type="places"
           hidecolumnpicker="true" context="placesContext"
           onselect="PlacesOrganizer.onPlaceSelected(true);"
+          onkeypress="PlacesOrganizer.onPlacesListKeyPress(this, event);"
           onclick="PlacesOrganizer.onPlacesListClick(event);"
           onfocus="PlacesOrganizer.updateDetailsPane(event);"
           seltype="single"

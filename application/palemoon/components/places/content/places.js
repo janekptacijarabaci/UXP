@@ -297,6 +297,33 @@ var PlacesOrganizer = {
   },
 
   /**
+   * Handle press on the places list.
+   * @param   aTree
+   *          The tree element.
+   * @param   aEvent
+   *          The key event.
+   */
+  onPlacesListKeyPress: function PO_onPlacesListKeyPress(aTree, aEvent) {
+    let tbo = aTree.treeBoxObject;
+    let tree = aEvent.target;
+    let node = tree.selectedNode;
+    if (node) {
+      if ((aEvent.keyCode ==
+          (aEvent.ctrlKey && KeyEvent.DOM_VK_BACK_SPACE)) &&
+          (node.parent && PlacesUtils.nodeIsContainer(node.parent))) {
+        let currentIndex = tbo.view.selection.currentIndex;
+        if (currentIndex >= 0) {
+          let parentIndex = tbo.view.getParentIndex(currentIndex);
+          if (parentIndex >= 0) {
+            tbo.ensureRowIsVisible(parentIndex);
+            tbo.view.selection.select(parentIndex);
+          }
+        }
+      }
+    }
+  },
+
+  /**
    * Handle focus changes on the places list and the current content view.
    */
   updateDetailsPane: function PO_updateDetailsPane() {
