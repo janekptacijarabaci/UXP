@@ -2870,6 +2870,14 @@ public:
    */
   static bool IsInvisibleBreak(nsINode* aNode, nsIFrame** aNextLineFrame = nullptr);
 
+  /**
+   * Resolve a column-gap/row-gap to a definite size.
+   * @note This method resolves 'normal' to zero.
+   *   Callers who want different behavior should handle 'normal' on their own.
+   */
+  static nscoord ResolveGapToLength(const nsStyleCoord& aGap,
+                                    nscoord aPercentageBasis);
+
 private:
   static uint32_t sFontSizeInflationEmPerLine;
   static uint32_t sFontSizeInflationMinTwips;

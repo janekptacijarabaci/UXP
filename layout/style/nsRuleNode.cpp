@@ -9152,11 +9152,11 @@ nsRuleNode::ComputeColumnData(void* aStartStruct,
              SETCOORD_UNSET_INITIAL,
            aContext, mPresContext, conditions);
 
-  // column-gap: length, inherit, normal
+  // column-gap: length, percent, inherit, normal
   SetCoord(*aRuleData->ValueForColumnGap(),
            column->mColumnGap, parent->mColumnGap,
-           SETCOORD_LH | SETCOORD_NORMAL | SETCOORD_INITIAL_NORMAL |
-             SETCOORD_CALC_LENGTH_ONLY | SETCOORD_UNSET_INITIAL,
+           SETCOORD_LPH | SETCOORD_NORMAL | SETCOORD_INITIAL_NORMAL |
+           SETCOORD_STORE_CALC | SETCOORD_UNSET_INITIAL,
            aContext, mPresContext, conditions);
   // clamp negative calc() to 0
   if (column->mColumnGap.GetUnit() == eStyleUnit_Coord) {
