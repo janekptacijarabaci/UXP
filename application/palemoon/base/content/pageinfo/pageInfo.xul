@@ -514,7 +514,7 @@
       <groupbox id="security-technical-groupbox" flex="1">
         <caption id="security-technical" label="&securityView.technical.header;" />
         <vbox id="security-technical-box" flex="1">
-          <label id="security-technical-shortform" class="fieldValue"/>
+          <label id="security-technical-shortform" class="fieldValue" tooltiptext=""/>
           <description id="security-technical-longform1" class="fieldLabel"/>
           <description id="security-technical-longform2" class="fieldLabel"/>
         </vbox>

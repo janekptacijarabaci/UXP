@@ -300,6 +300,7 @@ function securityOnLoad() {
     msg2 = pkiBundle.getString("pageInfo_Privacy_None2");
   }
   setText("security-technical-shortform", hdr);
+  setTooltipText("security-technical-shortform", info.encryptionSuite);
   setText("security-technical-longform1", msg1);
   setText("security-technical-longform2", msg2); 
   setText("general-security-privacy", hdr);
@@ -318,6 +319,14 @@ function setText(id, value)
     var textNode = document.createTextNode(value);
     element.appendChild(textNode);
   }
+}
+
+function setTooltipText(id, value)
+{
+  var element = document.getElementById(id);
+  if (!element)
+    return;
+  element.setAttribute("tooltiptext", value);
 }
 
 function viewCertHelper(parent, cert)
