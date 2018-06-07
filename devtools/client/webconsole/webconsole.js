@@ -8,6 +8,8 @@
 
 const {Cc, Ci, Cu} = require("chrome");
 
+Cu.importGlobalProperties(["URL"]);
+
 const {Utils: WebConsoleUtils, CONSOLE_WORKER_IDS} =
   require("devtools/client/webconsole/utils");
 const { getSourceNames } = require("devtools/client/shared/source-utils");
@@ -1850,8 +1852,16 @@ WebConsoleFrame.prototype = {
    * in a content page.
    */
   logWarningAboutReplacedAPI: function () {
+    let url = null;
+    try {
+      url = new URL(this._url);
+      url = url.hostname;
+    } catch (e) {
+      // Ignore.
+    }
     let node = this.createMessageNode(CATEGORY_JS, SEVERITY_WARNING,
-                                      l10n.getStr("ConsoleAPIDisabled"));
+                                      l10n.getFormatStr("ConsoleAPIDisabled",
+                                                        [url || "?"]));
     this.outputMessage(CATEGORY_JS, node);
   },
 
@@ -2016,6 +2026,7 @@ WebConsoleFrame.prototype = {
 
     if (packet.url) {
       this.onLocationChange(packet.url, packet.title);
+      this._url = packet.url;
     }
 
     if (event == "navigate" && !packet.nativeConsoleAPI) {
@@ -3145,6 +3156,14 @@ WebConsoleConnectionProxy.prototype = {
   webConsoleClient: null,
 
   /**
+   * The URL.
+   *
+   * @private
+   * @type string
+   */
+  _url: null,
+
+  /**
    * Tells if the connection is established.
    * @type boolean
    */
@@ -3224,6 +3243,7 @@ WebConsoleConnectionProxy.prototype = {
     if (this.target.isTabActor) {
       let tab = this.target.form;
       this.webConsoleFrame.onLocationChange(tab.url, tab.title);
+      this._url = tab.url;
     }
     this._attachConsole();
 
