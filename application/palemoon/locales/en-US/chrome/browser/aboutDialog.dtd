@@ -3,6 +3,10 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/.  -->
 <!ENTITY aboutDialog.title          "About &brandFullName;">
 
+<!ENTITY  copy.key                  "C">
+<!ENTITY  copy.label                "Copy">
+<!ENTITY  copy.accesskey            "C">
+
 <!-- LOCALIZATION NOTE (warningDesc.version): This is a warning about the experimental nature of Nightly and Aurora builds. It is only shown in those versions. -->
 <!ENTITY warningDesc.version        "&brandShortName; is experimental and may be unstable.">
 

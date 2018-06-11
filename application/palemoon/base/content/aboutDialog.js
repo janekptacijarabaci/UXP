@@ -5,6 +5,17 @@
 // Services = object with smart getters for common XPCOM services
 Components.utils.import("resource://gre/modules/Services.jsm");
 
+// Clipboard Helper
+function getClipboardHelper() {
+  try {
+    return Components.classes["@mozilla.org/widget/clipboardhelper;1"]
+           .getService(Components.interfaces.nsIClipboardHelper);
+  } catch (e) {
+    // Do nothing, later code will handle the error
+  }
+}
+const gClipboardHelper = getClipboardHelper();
+
 function init(aEvent)
 {
   if (aEvent.target != document)
@@ -80,6 +91,23 @@ function onUnload(aEvent) {
   gAppUpdater = null;
 }
 
+function doCopy() {
+  if (!gClipboardHelper) {
+    return;
+  }
+
+  let elem = document.commandDispatcher.focusedElement;
+
+  if (elem && elem.localName == "label") {
+    let sel = window.getSelection && window.getSelection();
+    if (sel.rangeCount && !sel.isCollapsed) {
+      let text = sel.getRangeAt(0).toString();
+      gClipboardHelper.copyString(text, document);
+    } else {
+      gClipboardHelper.copyString(elem.innerHTML, document);
+    }
+  }
+}
 
 function appUpdater()
 {

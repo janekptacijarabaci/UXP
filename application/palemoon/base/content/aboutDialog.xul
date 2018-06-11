@@ -43,9 +43,9 @@
       <vbox id="PMleftBox" flex="1"/>
       <vbox id="PMrightBox" flex="1">
 #ifdef HAVE_64BIT_BUILD
-#expand <label id="PMversion">Version: __MOZ_APP_VERSION__ (64-bit)</label>
+#expand <label id="PMversion" context="adcontext">Version: __MOZ_APP_VERSION__ (64-bit)</label>
 #else
-#expand <label id="PMversion">Version: __MOZ_APP_VERSION__ (32-bit)</label>
+#expand <label id="PMversion" context="adcontext">Version: __MOZ_APP_VERSION__ (32-bit)</label>
 #endif
         <label id="distribution" class="text-blurb"/>
         <label id="distributionId" class="text-blurb"/>
@@ -114,9 +114,20 @@
     </vbox>
   </vbox>
   
+  <commandset id="aboutDialogCommandSet">
+    <command id="cmd_copy"   oncommand="doCopy();"/>
+  </commandset>
+
   <keyset>
+    <key key="&copy.key;"    modifiers="accel" command="cmd_copy"/>
     <key keycode="VK_ESCAPE" oncommand="window.close();"/>
   </keyset>
+
+  <popupset>
+    <menupopup id="adcontext">
+      <menuitem id="menu_copy" label="&copy.label;" command="cmd_copy" accesskey="&copy.accesskey;"/>
+    </menupopup>
+  </popupset>
 
 #ifdef XP_MACOSX
 #include browserMountPoints.inc
