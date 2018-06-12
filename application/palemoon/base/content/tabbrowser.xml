@@ -2298,8 +2298,10 @@
             if (otherFindBar &&
                 otherFindBar.findMode == otherFindBar.FIND_NORMAL) {
               let ourFindBar = this.getFindBar(aOurTab);
-              ourFindBar.hidden = otherFindBar.hidden;
               ourFindBar._findField.value = otherFindBar._findField.value;
+              if (!otherFindBar.hidden) {
+                ourFindBar.onFindCommand();
+              }
             }
 
             // Finish tearing down the tab that's going away.
