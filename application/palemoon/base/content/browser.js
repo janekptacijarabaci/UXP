@@ -53,20 +53,13 @@ var gEditUIVisible = true;
 
 // Smart getter for the findbar.  If you don't wish to force the creation of
 // the findbar, check gFindBarInitialized first.
-var gFindBarInitialized = false;
-XPCOMUtils.defineLazyGetter(window, "gFindBar", function() {
-  let XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-  let findbar = document.createElementNS(XULNS, "findbar");
-  findbar.id = "FindToolbar";
 
-  let browserBottomBox = document.getElementById("browser-bottombox");
-  browserBottomBox.insertBefore(findbar, browserBottomBox.firstChild);
+this.__defineGetter__("gFindBar", function() {
+  return window.gBrowser.getFindBar();
+});
 
-  // Force a style flush to ensure that our binding is attached.
-  findbar.clientTop;
-  findbar.browser = gBrowser.mCurrentBrowser;
-  window.gFindBarInitialized = true;
-  return findbar;
+this.__defineGetter__("gFindBarInitialized", function() {
+  return window.gBrowser.isFindBarInitialized();
 });
 
 XPCOMUtils.defineLazyModuleGetter(this, "BrowserUtils",
@@ -324,67 +317,6 @@ const gSessionHistoryObserver = {
     if (gURLBar) {
       // Clear undo history of the URL bar
       gURLBar.editor.transactionManager.clear()
-    }
-  }
-};
-
-var gFindBarSettings = {
-  messageName: "Findbar:Keypress",
-  prefName: "accessibility.typeaheadfind",
-  findAsYouType: null,
-
-  init: function() {
-    window.messageManager.addMessageListener(this.messageName, this);
-
-    gPrefService.addObserver(this.prefName, this, false);
-    this.writeFindAsYouType();
-  },
-
-  uninit: function() {
-    window.messageManager.removeMessageListener(this.messageName, this);
-
-    try {
-      gPrefService.removeObserver(this.prefName, this);
-    } catch (ex) {
-      Cu.reportError(ex);
-    }
-  },
-
-  observe: function(aSubject, aTopic, aData) {
-    if (aTopic != "nsPref:changed") {
-      return;
-    }
-
-    this.writeFindAsYouType();
-  },
-
-  writeFindAsYouType: function() {
-    this.findAsYouType = gPrefService.getBoolPref(this.prefName);
-  },
-
-  receiveMessage: function(aMessage) {
-    switch (aMessage.name) {
-      case this.messageName:
-        // If the find bar for chrome window's context is not yet alive,
-        // only initialize it if there's a possibility FindAsYouType
-        // will be used.
-        // There's no point in doing it for most random keypresses.
-        if (!gFindBarInitialized && aMessage.data.shouldFastFind) {
-          let shouldFastFind = this.findAsYouType;
-          if (!shouldFastFind) {
-            // Please keep in sync with toolkit/content/widgets/findbar.xml
-            const FAYT_LINKS_KEY = "'";
-            const FAYT_TEXT_KEY = "/";
-            let charCode = aMessage.data.fakeEvent.charCode;
-            let key = charCode ? String.fromCharCode(charCode) : null;
-            shouldFastFind = key == FAYT_LINKS_KEY || key == FAYT_TEXT_KEY;
-          }
-          if (shouldFastFind) {
-            // Make sure we return the result.
-            return gFindBar.receiveMessage(aMessage);
-          }
-        }
-        break;
     }
   }
 };
@@ -791,7 +723,6 @@ var gBrowserInit = {
 #ifdef MOZ_DEVTOOLS
     DevToolsTheme.init();
 #endif
-    gFindBarSettings.init();
 
     messageManager.loadFrameScript("chrome://browser/content/content.js", true);
     messageManager.loadFrameScript("chrome://browser/content/content-sessionStore.js", true);
@@ -1367,7 +1298,6 @@ var gBrowserInit = {
 #ifdef MOZ_DEVTOOLS
     DevToolsTheme.uninit();
 #endif
-    gFindBarSettings.uninit();
 
     UserAgentCompatibility.uninit();
 
@@ -3907,16 +3837,7 @@ var XULBrowserWindow = {
           else
             elt.removeAttribute("disabled");
         }
-        if (gFindBarInitialized) {
-          if (!gFindBar.hidden && aDisable) {
-            gFindBar.hidden = true;
-            this._findbarTemporarilyHidden = true;
-          } else if (this._findbarTemporarilyHidden && !aDisable) {
-            gFindBar.hidden = false;
-            this._findbarTemporarilyHidden = false;
-          }
-        }
-      }.bind(this);
+      }
 
       var onContentRSChange = function onContentRSChange(e) {
         if (e.target.readyState != "interactive" && e.target.readyState != "complete")
