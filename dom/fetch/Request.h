@@ -34,9 +34,6 @@ class Request final : public nsISupports
 public:
   Request(nsIGlobalObject* aOwner, InternalRequest* aRequest);
 
-  static bool
-  RequestContextEnabled(JSContext* aCx, JSObject* aObj);
-
   JSObject*
   WrapObject(JSContext* aCx, JS::Handle<JSObject*> aGivenProto) override
   {
@@ -87,10 +84,10 @@ public:
     aIntegrity = mRequest->GetIntegrity();
   }
 
-  RequestContext
-  Context() const
+  RequestDestination
+  Destination() const
   {
-    return mRequest->Context();
+    return mRequest->Destination();
   }
 
   void
