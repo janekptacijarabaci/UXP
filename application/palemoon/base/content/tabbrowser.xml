@@ -3175,13 +3175,13 @@
               // it if there's a possibility FindAsYouType will be used.
               // There's no point in doing it for most random keypresses.
               if (!this.isFindBarInitialized(tab) &&
-                data.fakeEvent.shouldFastFind) {
+                aMessage.data.shouldFastFind) {
                 let shouldFastFind = this._findAsYouType;
                 if (!shouldFastFind) {
                   // Please keep in sync with toolkit/content/widgets/findbar.xml
                   const FAYT_LINKS_KEY = "'";
                   const FAYT_TEXT_KEY = "/";
-                  let charCode = data.fakeEvent.fakeEvent.charCode;
+                  let charCode = aMessage.data.fakeEvent.charCode;
                   let key = charCode ? String.fromCharCode(charCode) : null;
                   shouldFastFind = key == FAYT_LINKS_KEY || key == FAYT_TEXT_KEY;
                 }
