@@ -1217,7 +1217,11 @@ pref("privacy.donottrackheader.enabled",    false);
 // Enforce tracking protection in all modes
 pref("privacy.trackingprotection.enabled",  false);
 // Enforce tracking protection in Private Browsing mode
+#ifdef MOZ_SAFE_BROWSING
 pref("privacy.trackingprotection.pbmode.enabled",  true);
+#else
+pref("privacy.trackingprotection.pbmode.enabled",  false);
+#endif
 
 pref("dom.event.contextmenu.enabled",       true);
 pref("dom.event.clipboardevents.enabled",   true);
@@ -3385,7 +3389,7 @@ pref("gfx.font_rendering.cleartype_params.force_gdi_classic_for_families",
      "Arial,Consolas,Courier New,Microsoft Sans Serif,Segoe UI,Tahoma,Trebuchet MS,Verdana");
 // The maximum size at which we will force GDI classic mode using
 // force_gdi_classic_for_families.
-pref("gfx.font_rendering.cleartype_params.force_gdi_classic_max_size", 15);
+pref("gfx.font_rendering.cleartype_params.force_gdi_classic_max_size", 17);
 
 pref("ui.key.menuAccessKeyFocuses", true);
 

@@ -224,6 +224,11 @@ pref("keyword.enabled", true);
 pref("general.useragent.locale", "@AB_CD@");
 pref("general.skins.selectedSkin", "classic/1.0");
 
+// Native UA mode by default
+pref("general.useragent.compatMode", 0);
+pref("general.useragent.compatmode.gecko", false);
+pref("general.useragent.compatmode.firefox", false);
+
 pref("general.smoothScroll", true);
 #ifdef UNIX_BUT_NOT_MAC
 pref("general.autoScroll", false);
@@ -676,6 +681,9 @@ pref("browser.backspace_action", 2);
 pref("browser.backspace_action", 0);
 #endif
 
+// Pale Moon never eats the space with word selection, regardless of O.S.
+pref("layout.word_select.eat_space_to_next_word", false);
+
 // this will automatically enable inline spellchecking (if it is available) for
 // editable elements in HTML
 // 0 = spellcheck nothing
@@ -1009,7 +1017,6 @@ pref("services.sync.prefs.sync.privacy.clearOnShutdown.sessions", true);
 pref("services.sync.prefs.sync.privacy.clearOnShutdown.siteSettings", true);
 pref("services.sync.prefs.sync.privacy.clearOnShutdown.connectivityData", true);
 pref("services.sync.prefs.sync.privacy.donottrackheader.enabled", true);
-pref("services.sync.prefs.sync.privacy.donottrackheader.value", true);
 pref("services.sync.prefs.sync.privacy.sanitize.sanitizeOnShutdown", true);
 pref("services.sync.prefs.sync.security.OCSP.enabled", true);
 pref("services.sync.prefs.sync.security.OCSP.require", true);
