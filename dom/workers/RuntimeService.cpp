@@ -301,7 +301,9 @@ LoadContextOptions(const char* aPrefName, void* /* aClosure */)
                 .setNativeRegExp(GetWorkerPref<bool>(NS_LITERAL_CSTRING("native_regexp")))
                 .setAsyncStack(GetWorkerPref<bool>(NS_LITERAL_CSTRING("asyncstack")))
                 .setWerror(GetWorkerPref<bool>(NS_LITERAL_CSTRING("werror")))
-                .setExtraWarnings(GetWorkerPref<bool>(NS_LITERAL_CSTRING("strict")));
+                .setExtraWarnings(GetWorkerPref<bool>(NS_LITERAL_CSTRING("strict")))
+                .setArrayProtoValues(GetWorkerPref<bool>(
+                      NS_LITERAL_CSTRING("array_prototype_values")));
 
   RuntimeService::SetDefaultContextOptions(contextOptions);
 
@@ -2809,13 +2811,6 @@ WorkerThreadPrimaryRunnable::Run()
     }
 
     {
-#ifdef MOZ_ENABLE_PROFILER_SPS
-      PseudoStack* stack = mozilla_get_pseudo_stack();
-      if (stack) {
-        stack->sampleContext(cx);
-      }
-#endif
-
       {
         JSAutoRequest ar(cx);
 
@@ -2827,12 +2822,6 @@ WorkerThreadPrimaryRunnable::Run()
       }
 
       BackgroundChild::CloseForCurrentThread();
-
-#ifdef MOZ_ENABLE_PROFILER_SPS
-      if (stack) {
-        stack->sampleContext(nullptr);
-      }
-#endif
     }
 
     // There may still be runnables on the debugger event queue that hold a

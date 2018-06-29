@@ -59,14 +59,6 @@
 #include "nsIXULRuntime.h"
 #include "nsJSPrincipals.h"
 
-#ifdef MOZ_CRASHREPORTER
-#include "nsExceptionHandler.h"
-#endif
-
-#if defined(MOZ_JEMALLOC4)
-#include "mozmemory.h"
-#endif
-
 #ifdef XP_WIN
 #include <windows.h>
 #endif
@@ -151,18 +143,6 @@ public:
               mActive = false;
           }
       } else {
-#if defined(MOZ_JEMALLOC4)
-          if (mPurge) {
-              /* Jemalloc purges dirty pages regularly during free() when the
-               * ratio of dirty pages compared to active pages is higher than
-               * 1 << lg_dirty_mult. A high ratio can have an impact on
-               * performance, so we use the default ratio of 8, but force a
-               * regular purge of all remaining dirty pages, after cycle
-               * collection. */
-              Telemetry::AutoTimer<Telemetry::MEMORY_FREE_PURGED_PAGES_MS> timer;
-              jemalloc_free_dirty_pages();
-          }
-#endif
           mActive = false;
       }
       return NS_OK;
@@ -708,11 +688,6 @@ XPCJSContext::GCSliceCallback(JSContext* cx,
     XPCJSContext* self = nsXPConnect::GetContextInstance();
     if (!self)
         return;
-
-#ifdef MOZ_CRASHREPORTER
-    CrashReporter::SetGarbageCollecting(progress == JS::GC_CYCLE_BEGIN ||
-                                        progress == JS::GC_SLICE_BEGIN);
-#endif
 
     if (self->mPrevGCSliceCallback)
         (*self->mPrevGCSliceCallback)(cx, progress, desc);
@@ -1473,6 +1448,8 @@ ReloadPrefsCallback(const char* pref, void* data)
     sExtraWarningsForSystemJS = Preferences::GetBool(JS_OPTIONS_DOT_STR "strict.debug");
 #endif
 
+    bool arrayProtoValues = Preferences::GetBool(JS_OPTIONS_DOT_STR "array_prototype_values");
+
     JS::ContextOptionsRef(cx).setBaseline(useBaseline)
                              .setIon(useIon)
                              .setAsmJS(useAsmJS)
@@ -1484,7 +1461,8 @@ ReloadPrefsCallback(const char* pref, void* data)
                              .setThrowOnDebuggeeWouldRun(throwOnDebuggeeWouldRun)
                              .setDumpStackOnDebuggeeWouldRun(dumpStackOnDebuggeeWouldRun)
                              .setWerror(werror)
-                             .setExtraWarnings(extraWarnings);
+                             .setExtraWarnings(extraWarnings)
+                             .setArrayProtoValues(arrayProtoValues);
 
     JS_SetParallelParsingEnabled(cx, parallelParsing);
     JS_SetOffthreadIonCompilationEnabled(cx, offthreadIonCompilation);
@@ -1549,12 +1527,6 @@ XPCJSContext::~XPCJSContext()
 
     delete mDyingWrappedNativeProtoMap;
     mDyingWrappedNativeProtoMap = nullptr;
-
-#ifdef MOZ_ENABLE_PROFILER_SPS
-    // Tell the profiler that the context is gone
-    if (PseudoStack* stack = mozilla_get_pseudo_stack())
-        stack->sampleContext(nullptr);
-#endif
 
     Preferences::UnregisterCallback(ReloadPrefsCallback, JS_OPTIONS_DOT_STR, this);
 }
@@ -3404,10 +3376,6 @@ XPCJSContext::Initialize()
     JS_AddWeakPointerCompartmentCallback(cx, WeakPointerCompartmentCallback, this);
     JS_SetWrapObjectCallbacks(cx, &WrapObjectCallbacks);
     js::SetPreserveWrapperCallback(cx, PreserveWrapper);
-#ifdef MOZ_ENABLE_PROFILER_SPS
-    if (PseudoStack* stack = mozilla_get_pseudo_stack())
-        stack->sampleContext(cx);
-#endif
     JS_SetAccumulateTelemetryCallback(cx, AccumulateTelemetryCallback);
     js::SetActivityCallback(cx, ActivityCallback, this);
     JS_AddInterruptCallback(cx, InterruptCallback);

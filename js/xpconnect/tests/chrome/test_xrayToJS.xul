@@ -199,6 +199,9 @@ https://bugzilla.mozilla.org/show_bug.cgi?id=933681
       "includes", "forEach", "map", "reduce", "reduceRight", "filter", "some", "every", "find",
       "findIndex", "copyWithin", "fill", Symbol.iterator, Symbol.unscopables, "entries", "keys",
       "values", "constructor"];
+  if (isNightlyBuild) {
+    // ...nothing now
+  }
   gConstructorProperties['Array'] =
     constructorProps(["join", "reverse", "sort", "push", "pop", "shift",
                       "unshift", "splice", "concat", "slice", "isArray",

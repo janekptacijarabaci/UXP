@@ -20,7 +20,6 @@
 #include "mozilla/Vector.h"
 #include "mozilla/TimeStamp.h"
 #include "XREChildData.h"
-#include "XREShellData.h"
 
 /**
  * A directory service key which provides the platform-correct "application
@@ -426,17 +425,6 @@ XRE_API(const char*,
 XRE_API(void,
         XRE_SetProcessType, (const char* aProcessTypeString))
 
-#if defined(MOZ_CRASHREPORTER)
-// Used in the "master" parent process hosting the crash server
-XRE_API(bool,
-        XRE_TakeMinidumpForChild, (uint32_t aChildPid, nsIFile** aDump,
-                                   uint32_t* aSequence))
-
-// Used in child processes.
-XRE_API(bool,
-        XRE_SetRemoteExceptionHandler, (const char* aPipe))
-#endif
-
 namespace mozilla {
 namespace gmp {
 class GMPLoader;
@@ -515,8 +503,7 @@ XRE_API(void,
         XRE_EnableSameExecutableForContentProc, ())
 
 XRE_API(int,
-        XRE_XPCShellMain, (int argc, char** argv, char** envp,
-                           const XREShellData* aShellData))
+        XRE_XPCShellMain, (int argc, char** argv, char** envp))
 
 #if MOZ_WIDGET_GTK == 2
 XRE_API(void,
