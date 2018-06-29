@@ -12,12 +12,12 @@ DIRS += [
     'feeds',
     'fuel',
     'places',
+    'permissions',
     'preferences',
     'privatebrowsing',
     'search',
     'sessionstore',
     'shell',
-    'migration',
 ]
 
 if CONFIG['MOZ_BROWSER_STATUSBAR']:

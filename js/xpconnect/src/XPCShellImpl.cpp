@@ -44,9 +44,6 @@
 #ifdef XP_WIN
 #include "mozilla/widget/AudioSession.h"
 #include <windows.h>
-#if defined(MOZ_SANDBOX)
-#include "SandboxBroker.h"
-#endif
 #endif
 
 // all this crap is needed to do the interactive shell stuff
@@ -57,11 +54,6 @@
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>     /* for isatty() */
-#endif
-
-#ifdef MOZ_CRASHREPORTER
-#include "nsExceptionHandler.h"
-#include "nsICrashReporter.h"
 #endif
 
 using namespace mozilla;
@@ -1240,11 +1232,8 @@ GetCurrentWorkingDirectory(nsAString& workingDirectory)
 static JSSecurityCallbacks shellSecurityCallbacks;
 
 int
-XRE_XPCShellMain(int argc, char** argv, char** envp,
-                 const XREShellData* aShellData)
+XRE_XPCShellMain(int argc, char** argv, char** envp)
 {
-    MOZ_ASSERT(aShellData);
-
     JSContext* cx;
     int result = 0;
     nsresult rv;
@@ -1372,18 +1361,6 @@ XRE_XPCShellMain(int argc, char** argv, char** envp,
         argv += 2;
     }
 
-#ifdef MOZ_CRASHREPORTER
-    const char* val = getenv("MOZ_CRASHREPORTER");
-    if (val && *val) {
-        rv = CrashReporter::SetExceptionHandler(greDir, true);
-        if (NS_FAILED(rv)) {
-            printf("CrashReporter::SetExceptionHandler failed!\n");
-            return 1;
-        }
-        MOZ_ASSERT(CrashReporter::GetEnabled());
-    }
-#endif
-
     {
         if (argc > 1 && !strcmp(argv[1], "--greomni")) {
             nsCOMPtr<nsIFile> greOmni;
@@ -1501,16 +1478,6 @@ XRE_XPCShellMain(int argc, char** argv, char** envp,
         // Plugin may require audio session if installed plugin can initialize
         // asynchronized.
         AutoAudioSession audioSession;
-
-#if defined(MOZ_SANDBOX)
-        // Required for sandboxed child processes.
-        if (aShellData->sandboxBrokerServices) {
-          SandboxBroker::Initialize(aShellData->sandboxBrokerServices);
-        } else {
-          NS_WARNING("Failed to initialize broker services, sandboxed "
-                     "processes will fail to start.");
-        }
-#endif
 #endif
 
         {
@@ -1602,12 +1569,6 @@ XRE_XPCShellMain(int argc, char** argv, char** envp,
     dirprovider.ClearAppDir();
     dirprovider.ClearPluginDir();
     dirprovider.ClearAppFile();
-
-#ifdef MOZ_CRASHREPORTER
-    // Shut down the crashreporter service to prevent leaking some strings it holds.
-    if (CrashReporter::GetEnabled())
-        CrashReporter::UnsetExceptionHandler();
-#endif
 
     NS_LogTerm();
 

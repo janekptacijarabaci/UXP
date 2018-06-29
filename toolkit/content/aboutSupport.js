@@ -42,6 +42,9 @@ var snapshotFormatters = {
     $("os-box").textContent = data.osVersion;
     $("supportLink").href = data.supportURL;
     let version = AppConstants.MOZ_APP_VERSION_DISPLAY;
+    if (data.versionArch) {
+      version += " (" + data.versionArch + ")";
+    }
     if (data.vendor)
       version += " (" + data.vendor + ")";
     $("version-box").textContent = version;
@@ -75,69 +78,7 @@ var snapshotFormatters = {
   },
 
   crashes: function crashes(data) {
-    if (!AppConstants.MOZ_CRASHREPORTER)
-      return;
-
-    let strings = stringBundle();
-    let daysRange = Troubleshoot.kMaxCrashAge / (24 * 60 * 60 * 1000);
-    $("crashes-title").textContent =
-      PluralForm.get(daysRange, strings.GetStringFromName("crashesTitle"))
-                .replace("#1", daysRange);
-    let reportURL;
-    try {
-      reportURL = Services.prefs.getCharPref("breakpad.reportURL");
-      // Ignore any non http/https urls
-      if (!/^https?:/i.test(reportURL))
-        reportURL = null;
-    }
-    catch (e) { }
-    if (!reportURL) {
-      $("crashes-noConfig").style.display = "block";
-      $("crashes-noConfig").classList.remove("no-copy");
-      return;
-    }
-    $("crashes-allReports").style.display = "block";
-    $("crashes-allReports").classList.remove("no-copy");
-
-    if (data.pending > 0) {
-      $("crashes-allReportsWithPending").textContent =
-        PluralForm.get(data.pending, strings.GetStringFromName("pendingReports"))
-                  .replace("#1", data.pending);
-    }
-
-    let dateNow = new Date();
-    $.append($("crashes-tbody"), data.submitted.map(function (crash) {
-      let date = new Date(crash.date);
-      let timePassed = dateNow - date;
-      let formattedDate;
-      if (timePassed >= 24 * 60 * 60 * 1000)
-      {
-        let daysPassed = Math.round(timePassed / (24 * 60 * 60 * 1000));
-        let daysPassedString = strings.GetStringFromName("crashesTimeDays");
-        formattedDate = PluralForm.get(daysPassed, daysPassedString)
-                                  .replace("#1", daysPassed);
-      }
-      else if (timePassed >= 60 * 60 * 1000)
-      {
-        let hoursPassed = Math.round(timePassed / (60 * 60 * 1000));
-        let hoursPassedString = strings.GetStringFromName("crashesTimeHours");
-        formattedDate = PluralForm.get(hoursPassed, hoursPassedString)
-                                  .replace("#1", hoursPassed);
-      }
-      else
-      {
-        let minutesPassed = Math.max(Math.round(timePassed / (60 * 1000)), 1);
-        let minutesPassedString = strings.GetStringFromName("crashesTimeMinutes");
-        formattedDate = PluralForm.get(minutesPassed, minutesPassedString)
-                                  .replace("#1", minutesPassed);
-      }
-      return $.new("tr", [
-        $.new("td", [
-          $.new("a", crash.id, null, {href : reportURL + crash.id})
-        ]),
-        $.new("td", formattedDate)
-      ]);
-    }));
+    return;
   },
 
   extensions: function extensions(data) {
@@ -147,22 +88,6 @@ var snapshotFormatters = {
         $.new("td", extension.version),
         $.new("td", extension.isActive),
         $.new("td", extension.id),
-      ]);
-    }));
-  },
-
-  experiments: function experiments(data) {
-    $.append($("experiments-tbody"), data.map(function (experiment) {
-      return $.new("tr", [
-        $.new("td", experiment.name),
-        $.new("td", experiment.id),
-        $.new("td", experiment.description),
-        $.new("td", experiment.active),
-        $.new("td", experiment.endDate),
-        $.new("td", [
-          $.new("a", experiment.detailURL, null, {href : experiment.detailURL, })
-        ]),
-        $.new("td", experiment.branch),
       ]);
     }));
   },
@@ -575,26 +500,7 @@ var snapshotFormatters = {
     $("prefs-user-js-section").style.display = "";
     // Clear the no-copy class
     $("prefs-user-js-section").className = "";
-  },
-
-  sandbox: function sandbox(data) {
-    if (!AppConstants.MOZ_SANDBOX)
-      return;
-
-    let strings = stringBundle();
-    let tbody = $("sandbox-tbody");
-    for (let key in data) {
-      // Simplify the display a little in the common case.
-      if (key === "hasPrivilegedUserNamespaces" &&
-          data[key] === data["hasUserNamespaces"]) {
-        continue;
-      }
-      tbody.appendChild($.new("tr", [
-        $.new("th", strings.GetStringFromName(key), "column"),
-        $.new("td", data[key])
-      ]));
-    }
-  },
+  }
 };
 
 var $ = document.getElementById.bind(document);
@@ -793,7 +699,8 @@ Serializer.prototype = {
     let hasText = false;
     for (let child of elem.childNodes) {
       if (child.nodeType == Node.TEXT_NODE) {
-        let text = this._nodeText(child);
+        let text = this._nodeText(
+            child, (child.classList && child.classList.contains("endline")));
         this._appendText(text);
         hasText = hasText || !!text.trim();
       }
@@ -820,7 +727,7 @@ Serializer.prototype = {
     }
   },
 
-  _startNewLine: function (lines) {
+  _startNewLine: function () {
     let currLine = this._currentLine;
     if (currLine) {
       // The current line is not empty.  Trim it.
@@ -832,7 +739,7 @@ Serializer.prototype = {
     this._lines.push("");
   },
 
-  _appendText: function (text, lines) {
+  _appendText: function (text) {
     this._currentLine += text;
   },
 
@@ -855,7 +762,8 @@ Serializer.prototype = {
         let col = tableHeadingCols[i];
         if (col.localName != "th" || col.classList.contains("title-column"))
           break;
-        colHeadings[i] = this._nodeText(col).trim();
+        colHeadings[i] = this._nodeText(
+            col, (col.classList && col.classList.contains("endline"))).trim();
       }
     }
     let hasColHeadings = Object.keys(colHeadings).length > 0;
@@ -882,7 +790,10 @@ Serializer.prototype = {
           let text = "";
           if (colHeadings[j])
             text += colHeadings[j] + ": ";
-          text += this._nodeText(children[j]).trim();
+          text += this._nodeText(
+              children[j],
+              (children[j].classList &&
+               children[j].classList.contains("endline"))).trim();
           this._appendText(text);
           this._startNewLine();
         }
@@ -898,7 +809,10 @@ Serializer.prototype = {
       if (this._ignoreElement(trs[i]))
         continue;
       let children = trs[i].querySelectorAll("th,td");
-      let rowHeading = this._nodeText(children[0]).trim();
+      let rowHeading = this._nodeText(
+          children[0],
+          (children[0].classList &&
+           children[0].classList.contains("endline"))).trim();
       if (children[0].classList.contains("title-column")) {
         if (!this._isHiddenSubHeading(children[0]))
           this._appendText(rowHeading);
@@ -912,7 +826,10 @@ Serializer.prototype = {
           // queued up from querySelectorAll earlier.
           this._appendText(rowHeading + ": ");
         } else {
-          this._appendText(rowHeading + ": " + this._nodeText(children[1]).trim());
+          this._appendText(rowHeading + ": " + this._nodeText(
+              children[1],
+              (children[1].classList &&
+               children[1].classList.contains("endline"))).trim());
         }
       }
       this._startNewLine();
@@ -924,8 +841,16 @@ Serializer.prototype = {
     return elem.classList.contains("no-copy");
   },
 
-  _nodeText: function (node) {
-    return node.textContent.replace(/\s+/g, " ");
+  _nodeText: function (node, endline) {
+    let whiteChars = /\s+/g
+    let whiteCharsButNoEndline = /(?!\n)[\s]+/g;
+    let _node = node.cloneNode(true);
+    if (_node.firstElementChild &&
+        (_node.firstElementChild.nodeName.toLowerCase() == "button")) {
+      _node.removeChild(_node.firstElementChild);
+    }
+    return _node.textContent.replace(
+        endline ? whiteCharsButNoEndline : whiteChars, " ");
   },
 };
 
@@ -954,16 +879,25 @@ function populateActionBox() {
   }
 }
 
-// Prompt user to restart the browser in safe mode
-function safeModeRestart() {
+// Prompt user to restart the browser
+function restart(safeMode) {
   let cancelQuit = Cc["@mozilla.org/supports-PRBool;1"]
                      .createInstance(Ci.nsISupportsPRBool);
   Services.obs.notifyObservers(cancelQuit, "quit-application-requested", "restart");
 
-  if (!cancelQuit.data) {
-    Services.startup.restartInSafeMode(Ci.nsIAppStartup.eAttemptQuit);
+  if (cancelQuit.data) {
+    return;
+  }
+
+  let flags = Ci.nsIAppStartup.eAttemptQuit;
+
+  if (safeMode) {
+    Services.startup.restartInSafeMode(flags);
+  } else {
+    Services.startup.quit(flags | Ci.nsIAppStartup.eRestart);
   }
 }
+
 /**
  * Set up event listeners for buttons.
  */
@@ -990,14 +924,17 @@ function setupEventListeners() {
     if (Services.obs.enumerateObservers("restart-in-safe-mode").hasMoreElements()) {
       Services.obs.notifyObservers(null, "restart-in-safe-mode", "");
     } else {
-      safeModeRestart();
+      restart(true);
     }
+  });
+  $("restart-button").addEventListener("click", function(event) {
+    restart(false);
   });
   $("verify-place-integrity-button").addEventListener("click", function(event) {
     PlacesDBUtils.checkAndFixDatabase(function(aLog) {
       let msg = aLog.join("\n");
       $("verify-place-result").style.display = "block";
-      $("verify-place-result").classList.remove("no-copy");
+      $("verify-place-result-parent").classList.remove("no-copy");
       $("verify-place-result").textContent = msg;
     });
   });

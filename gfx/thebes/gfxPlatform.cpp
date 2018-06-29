@@ -18,7 +18,6 @@
 #include "mozilla/Logging.h"
 #include "mozilla/Services.h"
 
-#include "gfxCrashReporterUtils.h"
 #include "gfxPlatform.h"
 #include "gfxPrefs.h"
 #include "gfxEnv.h"
@@ -71,9 +70,6 @@
 #include "nsIScreenManager.h"
 #include "FrameMetrics.h"
 #include "MainThreadUtils.h"
-#ifdef MOZ_CRASHREPORTER
-#include "nsExceptionHandler.h"
-#endif
 
 #include "nsWeakReference.h"
 
@@ -293,12 +289,7 @@ void CrashStatsLogForwarder::UpdateCrashReport()
     message << logAnnotation << Get<0>(*it) << "]" << Get<1>(*it) << " (t=" << Get<2>(*it) << ") ";
   }
 
-#ifdef MOZ_CRASHREPORTER
-  nsCString reportString(message.str().c_str());
-  nsresult annotated = CrashReporter::AnnotateCrashReport(mCrashCriticalKey, reportString);
-#else
   nsresult annotated = NS_ERROR_NOT_IMPLEMENTED;
-#endif
   if (annotated != NS_OK) {
     printf("Crash Annotation %s: %s",
            mCrashCriticalKey.get(), message.str().c_str());
@@ -658,7 +649,6 @@ gfxPlatform::Init()
                                gfxPrefs::CanvasAzureAccelerated(),
                                gfxPrefs::DisableGralloc(),
                                gfxPrefs::ForceShmemTiles());
-      ScopedGfxFeatureReporter::AppNote(forcedPrefs);
     }
 
     InitMoz2DLogging();
@@ -2407,11 +2397,10 @@ gfxPlatform::GetTilesSupportInfo(mozilla::widget::InfoObject& aObj)
 /*static*/ bool
 gfxPlatform::AsyncPanZoomEnabled()
 {
-#if !defined(MOZ_B2G) && !defined(MOZ_WIDGET_ANDROID) && !defined(MOZ_WIDGET_UIKIT)
-  // For XUL applications (everything but B2G on mobile and desktop, and
-  // Firefox on Android) we only want to use APZ when E10S is enabled. If
-  // we ever get input events off the main thread we can consider relaxing
-  // this requirement.
+#if !defined(MOZ_WIDGET_ANDROID) && !defined(MOZ_WIDGET_UIKIT)
+  // For XUL applications (everything but Firefox on Android) we only want
+  // to use APZ when E10S is enabled. If we ever get input events off the
+  // main thread we can consider relaxing this requirement.
   if (!BrowserTabsRemoteAutostart()) {
     return false;
   }

@@ -37,7 +37,7 @@ def build_dict(config, env=os.environ):
     known_os = {"Linux": "linux",
                 "WINNT": "win",
                 "Darwin": "mac",
-                "Android": "b2g" if substs.get("MOZ_WIDGET_TOOLKIT") == "gonk" else "android"}
+                "Android": "android"}
     if o in known_os:
         d["os"] = known_os[o]
     else:
@@ -80,7 +80,6 @@ def build_dict(config, env=os.environ):
     d['nightly_build'] = substs.get('NIGHTLY_BUILD') == '1'
     d['release_or_beta'] = substs.get('RELEASE_OR_BETA') == '1'
     d['pgo'] = substs.get('MOZ_PGO') == '1'
-    d['crashreporter'] = bool(substs.get('MOZ_CRASHREPORTER'))
     d['datareporting'] = bool(substs.get('MOZ_DATA_REPORTING'))
     d['healthreport'] = substs.get('MOZ_SERVICES_HEALTHREPORT') == '1'
     d['sync'] = substs.get('MOZ_SERVICES_SYNC') == '1'
@@ -91,7 +90,7 @@ def build_dict(config, env=os.environ):
     d['bin_suffix'] = substs.get('BIN_SUFFIX', '')
     d['addon_signing'] = substs.get('MOZ_ADDON_SIGNING') == '1'
     d['require_signing'] = substs.get('MOZ_REQUIRE_SIGNING') == '1'
-    d['official'] = bool(substs.get('MOZILLA_OFFICIAL'))
+    d['official'] = bool(substs.get('MC_OFFICIAL'))
     d['sm_promise'] = bool(substs.get('SPIDERMONKEY_PROMISE'))
 
     def guess_platform():
@@ -111,14 +110,6 @@ def build_dict(config, env=os.environ):
                 p = '{}-asan'.format(p)
 
             return p
-
-        if d['buildapp'] == 'b2g':
-            if d['toolkit'] == 'gonk':
-                return 'emulator'
-
-            if d['bits'] == 64:
-                return 'linux64_gecko'
-            return 'linux32_gecko'
 
         if d['buildapp'] == 'mobile/android':
             if d['processor'] == 'x86':
