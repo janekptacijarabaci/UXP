@@ -17,20 +17,103 @@ const prefs = require('../preferences/service');
 const buttonsList = new Map();
 const LOCATION_PREF_ROOT = "extensions.sdk-button-location.";
 
+const NODES_WITH_DYNAMIC_ID = [
+  {
+    "nodeName": "toolbarseparator",
+    "idPrefix": "separator"
+  },
+  {
+    "nodeName": "toolbarspring",
+    "idPrefix": "spring"
+  },
+  {
+    "nodeName": "toolbarspacer",
+    "idPrefix": "spacer"
+  }
+];
+
+const DYNAMIC_ID_REGEXP = /\[([0-9]+)\]/;
+
 let gWindowListener;
 
-function getLocation(id) {
+function getNodeWithDynamicId(aParentNode, aId) {
+  let result = aId;
+
+  let idPrefix = NODES_WITH_DYNAMIC_ID.find(function(item) {
+    let len = item.idPrefix.length;
+    return item.idPrefix.substring(0, len) == aId.substring(0, len);
+  });  
+  if (idPrefix) {
+    let matches = DYNAMIC_ID_REGEXP.exec(aId);
+    let siblingN = matches && matches[1];
+
+    if (aParentNode && (siblingN !== null)) {
+      let node = aParentNode.firstChild;
+      let nextSiblings = -1;
+
+      while (node) {
+        if (node.nodeName == idPrefix.nodeName) {
+          nextSiblings++;
+        }
+        if (nextSiblings == siblingN) {
+          result = node.id;
+          break;
+        }
+        node = node.nextElementSibling || node.nextSibling;
+      }
+    }
+  }
+
+  return result;
+}
+
+function setNodeWithDynamicId(aNode, aId) {
+  let result = aId;
+
+  if (aNode && aNode.nodeName) {
+    let idPrefix = NODES_WITH_DYNAMIC_ID.find(function(item) {
+      return item.nodeName == aNode.nodeName;
+    });  
+    if (idPrefix) {
+      let node = aNode.previousElementSibling || aNode.previousSibling;
+      let previousSiblings = 0;
+
+      while (node) {
+        if (node.nodeName == idPrefix.nodeName) {
+          previousSiblings++;
+        }
+        node = node.previousElementSibling || node.previousSibling;
+      }
+      result = idPrefix.idPrefix + "[" + previousSiblings + "]";
+    }
+  }
+
+  return result;
+}
+ 
+function getLocation(doc, id) {
   let toolbarId = "nav-bar", nextItemId = "";
   let location = prefs.get(LOCATION_PREF_ROOT + id);
   if (location && location.indexOf(",") !== -1) {
     [toolbarId, nextItemId] = location.split(",");
   }
+
+  if (nextItemId != "") {
+    let toolbar = toolbarId != "" && doc.getElementById(toolbarId);
+    nextItemId = getNodeWithDynamicId(toolbar, nextItemId);
+  }
+
   return [toolbarId, nextItemId];
 }
 
-function saveLocation(id, toolbarId, nextItemId) {
+function saveLocation(id, toolbarId, nextItem, nextItemId) {
   let _toolbarId = toolbarId || "";
   let _nextItemId = nextItemId || "";
+
+  if (_nextItemId != "") {
+    _nextItemId = setNodeWithDynamicId(nextItem, _nextItemId);
+  }
+
   prefs.set(LOCATION_PREF_ROOT + id, [_toolbarId, _nextItemId].join(","));
 }
 
@@ -46,7 +129,7 @@ function insertButton(aWindow, id, onBuild) {
   toolbox.palette.appendChild(b);
 
   // Retrieve button location from preferences
-  let [toolbarId, nextItemId] = getLocation(id);
+  let [toolbarId, nextItemId] = getLocation(doc, id);
   let toolbar = toolbarId != "" && doc.getElementById(toolbarId);
 
   if (toolbar) {
@@ -82,16 +165,16 @@ function afterCustomize(e) {
   for (let [id] of buttonsList) {
     let toolbox = e.target;
     let b = toolbox.parentNode.querySelector("#" + id);
-    let toolbarId = null, nextItemId = null;
+    let toolbarId = null, nextItem = null, nextItemId = null;
     if (b) {
       let parent = b.parentNode;
-      let nextItem = b.nextSibling;
+      nextItem = b.nextSibling;
       if (parent && parent.localName == "toolbar") {
         toolbarId = parent.id;
         nextItemId = nextItem && nextItem.id;
       }
     }
-    saveLocation(id, toolbarId, nextItemId);
+    saveLocation(id, toolbarId, nextItem, nextItemId);
   }
 }
 
