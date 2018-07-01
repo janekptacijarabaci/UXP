@@ -44,6 +44,12 @@
           &aboutSupport.restartInSafeMode.label;
         </button>
       </div>
+      <div id="restart-box">
+        <h3>&aboutSupport.restartTitle;</h3>
+        <button id="restart-button">
+          &aboutSupport.restartNormal.label;
+        </button>
+      </div>
 
     </div>
     <h1>
@@ -253,34 +259,6 @@
       </table>
 
       <!-- - - - - - - - - - - - - - - - - - - - - -->
-#ifdef MOZ_CRASHREPORTER
-
-      <h2 class="major-section" id="crashes-title">
-        &aboutSupport.crashes.title;
-      </h2>
-
-      <table id="crashes-table">
-        <thead>
-          <tr>
-            <th>
-              &aboutSupport.crashes.id;
-            </th>
-            <th>
-              &aboutSupport.crashes.sendDate;
-            </th>
-          </tr>
-        </thead>
-        <tbody id="crashes-tbody">
-        </tbody>
-      </table>
-      <p id="crashes-allReports" class="hidden no-copy">
-        <a href="about:crashes" id="crashes-allReportsWithPending" class="block">&aboutSupport.crashes.allReports;</a>
-      </p>
-      <p id="crashes-noConfig" class="hidden no-copy">&aboutSupport.crashes.noConfig;</p>
-
-#endif
-      <!-- - - - - - - - - - - - - - - - - - - - - -->
-
       <h2 class="major-section">
         &aboutSupport.extensionsTitle;
       </h2>
@@ -435,16 +413,16 @@
       </h2>
 
       <table>
-        <tr class="no-copy">
+        <tr id="verify-place-result-parent" class="no-copy">
           <th class="column">
             &aboutSupport.placeDatabaseIntegrity;
           </th>
 
-          <td>
+          <td class="endline">
             <button id="verify-place-integrity-button">
               &aboutSupport.placeDatabaseVerifyIntegrity;
             </button>
-            <pre id="verify-place-result" class="hidden no-copy"></pre>
+            <pre id="verify-place-result" class="hidden"></pre>
           </td>
         </tr>
       </table>
@@ -502,53 +480,6 @@
         <tbody id="libversions-tbody">
         </tbody>
       </table>
-
-
-      <h2 class="major-section">
-        &aboutSupport.experimentsTitle;
-      </h2>
-
-      <table>
-        <thead>
-          <tr>
-            <th>
-              &aboutSupport.experimentName;
-            </th>
-            <th>
-              &aboutSupport.experimentId;
-            </th>
-            <th>
-              &aboutSupport.experimentDescription;
-            </th>
-            <th>
-              &aboutSupport.experimentActive;
-            </th>
-            <th>
-              &aboutSupport.experimentEndDate;
-            </th>
-            <th>
-              &aboutSupport.experimentHomepage;
-            </th>
-            <th>
-              &aboutSupport.experimentBranch;
-            </th>
-          </tr>
-        </thead>
-        <tbody id="experiments-tbody">
-        </tbody>
-      </table>
-      <!-- - - - - - - - - - - - - - - - - - - - - -->
-
-#if defined(MOZ_SANDBOX)
-      <h2 class="major-section" id="sandbox">
-	&aboutSupport.sandboxTitle;
-      </h2>
-
-      <table>
-	<tbody id="sandbox-tbody">
-	</tbody>
-      </table>
-#endif
 
     </div>
 

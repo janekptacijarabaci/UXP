@@ -10,14 +10,6 @@ const { classes: Cc, interfaces: Ci, utils: Cu } = Components;
 
 Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/AppConstants.jsm");
-
-var Experiments;
-try {
-  Experiments = Cu.import("resource:///modules/experiments/Experiments.jsm").Experiments;
-}
-catch (e) {
-}
 
 // We use a preferences whitelist to make sure we only show preferences that
 // are useful for support and won't compromise the user's privacy.  Note that
@@ -90,7 +82,6 @@ const PREFS_WHITELIST = [
   "services.sync.lastSync",
   "services.sync.numClients",
   "services.sync.engine.",
-  "social.enabled",
   "storage.vacuum.last.",
   "svg.",
   "toolkit.startup.recent_crashes",
@@ -185,16 +176,23 @@ var dataProviders = {
     let data = {
       name: Services.appinfo.name,
       osVersion: sysInfo.getProperty("name") + " " + sysInfo.getProperty("version"),
-      version: AppConstants.MOZ_APP_VERSION_DISPLAY,
       buildID: Services.appinfo.appBuildID,
       userAgent: Cc["@mozilla.org/network/protocol;1?name=http"].
                  getService(Ci.nsIHttpProtocolHandler).
                  userAgent,
       safeMode: Services.appinfo.inSafeMode,
     };
+#expand data.version = "__MOZ_APP_VERSION_DISPLAY__";
 
-    if (AppConstants.MOZ_UPDATER)
-      data.updateChannel = Cu.import("resource://gre/modules/UpdateUtils.jsm", {}).UpdateUtils.UpdateChannel;
+#ifdef MOZ_UPDATER
+    data.updateChannel = Cu.import("resource://gre/modules/UpdateUtils.jsm", {}).UpdateUtils.UpdateChannel;
+#endif
+
+#ifdef HAVE_64BIT_BUILD
+    data.versionArch = "64-bit";
+#else
+    data.versionArch = "32-bit";
+#endif
 
     try {
       data.vendor = Services.prefs.getCharPref("app.support.vendor");
@@ -261,18 +259,6 @@ var dataProviders = {
         }, {});
       }));
     });
-  },
-
-  experiments: function experiments(done) {
-    if (Experiments === undefined) {
-      done([]);
-      return;
-    }
-
-    // getExperiments promises experiment history
-    Experiments.instance().getExperiments().then(
-      experiments => done(experiments)
-    );
   },
 
   modifiedPreferences: function modifiedPreferences(done) {
@@ -361,18 +347,23 @@ var dataProviders = {
                    QueryInterface(Ci.nsIInterfaceRequestor).
                    getInterface(Ci.nsIDOMWindowUtils)
     data.supportsHardwareH264 = "Unknown";
-    let promise = winUtils.supportsHardwareH264Decoding;
-    promise.then(function(v) {
-      data.supportsHardwareH264 = v;
-    });
-    promises.push(promise);
+    try {
+      // After restart - data may not be available
+      let promise = winUtils.supportsHardwareH264Decoding;
+      promise.then(function(v) {
+        data.supportsHardwareH264 = v;
+      });
+      promises.push(promise);
+    } catch (e) {}
 
     data.currentAudioBackend = winUtils.currentAudioBackend;
 
     if (!data.numAcceleratedWindows && gfxInfo) {
-      let win = AppConstants.platform == "win";
-      let feature = win ? gfxInfo.FEATURE_DIRECT3D_9_LAYERS :
-                          gfxInfo.FEATURE_OPENGL_LAYERS;
+#ifdef XP_WIN
+      let feature = gfxInfo.FEATURE_DIRECT3D_9_LAYERS;
+#else
+      let feature = gfxInfo.FEATURE_OPENGL_LAYERS;
+#endif
       data.numAcceleratedWindowsMessage = statusMsgForFeature(feature);
     }
 
@@ -469,7 +460,9 @@ var dataProviders = {
 
         // Eagerly free resources.
         let loseExt = gl.getExtension("WEBGL_lose_context");
-        loseExt.loseContext();
+        if (loseExt) {
+          loseExt.loseContext();
+        }
 
 
         return contextInfo;
@@ -549,41 +542,3 @@ var dataProviders = {
   }
 };
 
-if (AppConstants.MOZ_CRASHREPORTER) {
-  dataProviders.crashes = function crashes(done) {
-    let CrashReports = Cu.import("resource://gre/modules/CrashReports.jsm").CrashReports;
-    let reports = CrashReports.getReports();
-    let now = new Date();
-    let reportsNew = reports.filter(report => (now - report.date < Troubleshoot.kMaxCrashAge));
-    let reportsSubmitted = reportsNew.filter(report => (!report.pending));
-    let reportsPendingCount = reportsNew.length - reportsSubmitted.length;
-    let data = {submitted : reportsSubmitted, pending : reportsPendingCount};
-    done(data);
-  }
-}
-
-if (AppConstants.MOZ_SANDBOX) {
-  dataProviders.sandbox = function sandbox(done) {
-    let data = {};
-    if (AppConstants.platform == "linux") {
-      const keys = ["hasSeccompBPF", "hasSeccompTSync",
-                    "hasPrivilegedUserNamespaces", "hasUserNamespaces",
-                    "canSandboxContent", "canSandboxMedia"];
-
-      let sysInfo = Cc["@mozilla.org/system-info;1"].
-                    getService(Ci.nsIPropertyBag2);
-      for (let key of keys) {
-        if (sysInfo.hasKey(key)) {
-          data[key] = sysInfo.getPropertyAsBool(key);
-        }
-      }
-    }
-
-    if (AppConstants.MOZ_CONTENT_SANDBOX) {
-      data.contentSandboxLevel =
-        Services.prefs.getIntPref("security.sandbox.content.level");
-    }
-
-    done(data);
-  }
-}

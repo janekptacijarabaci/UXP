@@ -3,6 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+XPCOMUtils.defineLazyModuleGetter(this, "LoginHelper",
+ "resource://gre/modules/LoginHelper.jsm");
+
 Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
 
 var gSecurityPane = {
@@ -128,9 +131,21 @@ var gSecurityPane = {
    */
   showPasswordExceptions: function ()
   {
+    let bundlePrefs = document.getElementById("bundlePreferences");
+    let params = {
+      blockVisible: true,
+      sessionVisible: false,
+      allowVisible: false,
+      hideStatusColumn: true,
+      prefilledHost: "",
+      permissionType: "login-saving",
+      windowTitle: bundlePrefs.getString("savedLoginsExceptions_title"),
+      introText: bundlePrefs.getString("savedLoginsExceptions_desc")
+    };
+
     document.documentElement.openWindow("Toolkit:PasswordManagerExceptions",
-                                        "chrome://passwordmgr/content/passwordManagerExceptions.xul",
-                                        "", null);
+                                        "chrome://browser/content/preferences/permissions.xul",
+                                        null, params);
   },
 
   /**
@@ -141,33 +156,13 @@ var gSecurityPane = {
    */
   _initMasterPasswordUI: function ()
   {
-    var noMP = !this._masterPasswordSet();
+    var noMP = !LoginHelper.isMasterPasswordSet();
 
     var button = document.getElementById("changeMasterPassword");
     button.disabled = noMP;
 
     var checkbox = document.getElementById("useMasterPassword");
     checkbox.checked = !noMP;
-  },
-
-  /**
-   * Returns true if the user has a master password set and false otherwise.
-   */
-  _masterPasswordSet: function ()
-  {
-    const Cc = Components.classes, Ci = Components.interfaces;
-    var secmodDB = Cc["@mozilla.org/security/pkcs11moduledb;1"].
-                   getService(Ci.nsIPKCS11ModuleDB);
-    var slot = secmodDB.findSlotByName("");
-    if (slot) {
-      var status = slot.status;
-      var hasMP = status != Ci.nsIPKCS11Slot.SLOT_UNINITIALIZED &&
-                  status != Ci.nsIPKCS11Slot.SLOT_READY;
-      return hasMP;
-    } else {
-      // XXX I have no bloody idea what this means
-      return false;
-    }
   },
 
   /**

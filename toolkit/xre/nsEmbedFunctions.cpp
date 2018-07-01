@@ -75,25 +75,12 @@
 
 #include "mozilla/Telemetry.h"
 
-#if defined(MOZ_SANDBOX) && defined(XP_WIN)
-#include "mozilla/sandboxTarget.h"
-#include "mozilla/sandboxing/loggingCallbacks.h"
-#endif
-
-#if defined(MOZ_CONTENT_SANDBOX) && !defined(MOZ_WIDGET_GONK)
-#include "mozilla/Preferences.h"
-#endif
-
 #ifdef MOZ_IPDL_TESTS
 #include "mozilla/_ipdltest/IPDLUnitTests.h"
 #include "mozilla/_ipdltest/IPDLUnitTestProcessChild.h"
 
 using mozilla::_ipdltest::IPDLUnitTestProcessChild;
 #endif  // ifdef MOZ_IPDL_TESTS
-
-#ifdef MOZ_JPROF
-#include "jprof.h"
-#endif
 
 using namespace mozilla;
 
@@ -239,30 +226,6 @@ XRE_SetProcessType(const char* aProcessTypeString)
   }
 }
 
-#if defined(MOZ_CRASHREPORTER)
-// FIXME/bug 539522: this out-of-place function is stuck here because
-// IPDL wants access to this crashreporter interface, and
-// crashreporter is built in such a way to make that awkward
-bool
-XRE_TakeMinidumpForChild(uint32_t aChildPid, nsIFile** aDump,
-                         uint32_t* aSequence)
-{
-  return CrashReporter::TakeMinidumpForChild(aChildPid, aDump, aSequence);
-}
-
-bool
-XRE_SetRemoteExceptionHandler(const char* aPipe/*= 0*/)
-{
-#if defined(XP_WIN) || defined(XP_MACOSX)
-  return CrashReporter::SetRemoteExceptionHandler(nsDependentCString(aPipe));
-#elif defined(OS_LINUX)
-  return CrashReporter::SetRemoteExceptionHandler();
-#else
-#  error "OOP crash reporter unsupported on this platform"
-#endif
-}
-#endif // if defined(MOZ_CRASHREPORTER)
-
 #if defined(XP_WIN)
 void
 SetTaskbarGroupId(const nsString& aId)
@@ -272,22 +235,6 @@ SetTaskbarGroupId(const nsString& aId)
     }
 }
 #endif
-
-#if defined(MOZ_CRASHREPORTER)
-#if defined(MOZ_CONTENT_SANDBOX) && !defined(MOZ_WIDGET_GONK)
-void
-AddContentSandboxLevelAnnotation()
-{
-  if (XRE_GetProcessType() == GeckoProcessType_Content) {
-    int level = Preferences::GetInt("security.sandbox.content.level");
-    nsAutoCString levelString;
-    levelString.AppendInt(level);
-    CrashReporter::AnnotateCrashReport(
-      NS_LITERAL_CSTRING("ContentSandboxLevel"), levelString);
-  }
-}
-#endif /* MOZ_CONTENT_SANDBOX && !MOZ_WIDGET_GONK */
-#endif /* MOZ_CRASHREPORTER */
 
 nsresult
 XRE_InitChildProcess(int aArgc,
@@ -299,12 +246,7 @@ XRE_InitChildProcess(int aArgc,
   NS_ENSURE_ARG_POINTER(aArgv[0]);
   MOZ_ASSERT(aChildData);
 
-#ifdef MOZ_JPROF
-  // Call the code to install our handler
-  setupProfilingStuff();
-#endif
-
-#if !defined(MOZ_WIDGET_ANDROID) && !defined(MOZ_WIDGET_GONK)
+#if !defined(MOZ_WIDGET_ANDROID)
   // On non-Fennec Gecko, the GMPLoader code resides in plugin-container,
   // and we must forward it through to the GMP code here.
   GMPProcessChild::SetGMPLoader(aChildData->gmpLoader.get());
@@ -339,11 +281,6 @@ XRE_InitChildProcess(int aArgc,
         freopen("CONIN$", "r", stdin);
   }
 
-#if defined(MOZ_SANDBOX)
-  if (aChildData->sandboxTargetServices) {
-    SandboxTarget::Instance()->SetTargetServices(aChildData->sandboxTargetServices);
-  }
-#endif
 #endif
 
   // NB: This must be called before profiler_init
@@ -441,33 +378,6 @@ XRE_InitChildProcess(int aArgc,
 #endif
 
   SetupErrorHandling(aArgv[0]);  
-
-#if defined(MOZ_CRASHREPORTER)
-  if (aArgc < 1)
-    return NS_ERROR_FAILURE;
-  const char* const crashReporterArg = aArgv[--aArgc];
-  
-#  if defined(XP_WIN) || defined(XP_MACOSX)
-  // on windows and mac, |crashReporterArg| is the named pipe on which the
-  // server is listening for requests, or "-" if crash reporting is
-  // disabled.
-  if (0 != strcmp("-", crashReporterArg) && 
-      !XRE_SetRemoteExceptionHandler(crashReporterArg)) {
-    // Bug 684322 will add better visibility into this condition
-    NS_WARNING("Could not setup crash reporting\n");
-  }
-#  elif defined(OS_LINUX)
-  // on POSIX, |crashReporterArg| is "true" if crash reporting is
-  // enabled, false otherwise
-  if (0 != strcmp("false", crashReporterArg) && 
-      !XRE_SetRemoteExceptionHandler(nullptr)) {
-    // Bug 684322 will add better visibility into this condition
-    NS_WARNING("Could not setup crash reporting\n");
-  }
-#  else
-#    error "OOP crash reporting unsupported on this platform"
-#  endif   
-#endif // if defined(MOZ_CRASHREPORTER)
 
   gArgv = aArgv;
   gArgc = aArgc;
@@ -586,11 +496,6 @@ XRE_InitChildProcess(int aArgc,
           // If passed in grab the application path for xpcom init
           bool foundAppdir = false;
 
-#if defined(XP_MACOSX) && defined(MOZ_CONTENT_SANDBOX)
-          // If passed in grab the profile path for sandboxing
-          bool foundProfile = false;
-#endif
-
           for (int idx = aArgc; idx > 0; idx--) {
             if (aArgv[idx] && !strcmp(aArgv[idx], "-appdir")) {
               MOZ_ASSERT(!foundAppdir);
@@ -606,19 +511,6 @@ XRE_InitChildProcess(int aArgc,
             if (aArgv[idx] && !strcmp(aArgv[idx], "-safeMode")) {
               gSafeMode = true;
             }
-
-#if defined(XP_MACOSX) && defined(MOZ_CONTENT_SANDBOX)
-            if (aArgv[idx] && !strcmp(aArgv[idx], "-profile")) {
-              MOZ_ASSERT(!foundProfile);
-              if (foundProfile) {
-                continue;
-              }
-              nsCString profile;
-              profile.Assign(nsDependentCString(aArgv[idx+1]));
-              static_cast<ContentProcess*>(process.get())->SetProfile(profile);
-              foundProfile = true;
-            }
-#endif /* XP_MACOSX && MOZ_CONTENT_SANDBOX */
           }
         }
         break;
@@ -647,12 +539,6 @@ XRE_InitChildProcess(int aArgc,
         return NS_ERROR_FAILURE;
       }
 
-#ifdef MOZ_CRASHREPORTER
-#if defined(XP_WIN) || defined(XP_MACOSX)
-      CrashReporter::InitChildProcessTmpDir();
-#endif
-#endif
-
 #if defined(XP_WIN)
       // Set child processes up such that they will get killed after the
       // chrome process is killed in cases where the user shuts the system
@@ -660,19 +546,7 @@ XRE_InitChildProcess(int aArgc,
       ::SetProcessShutdownParameters(0x280 - 1, SHUTDOWN_NORETRY);
 #endif
 
-#if defined(MOZ_SANDBOX) && defined(XP_WIN)
-      // We need to do this after the process has been initialised, as
-      // InitLoggingIfRequired may need access to prefs.
-      mozilla::sandboxing::InitLoggingIfRequired(aChildData->ProvideLogFunction);
-#endif
-
       OverrideDefaultLocaleIfNeeded();
-
-#if defined(MOZ_CRASHREPORTER)
-#if defined(MOZ_CONTENT_SANDBOX) && !defined(MOZ_WIDGET_GONK)
-      AddContentSandboxLevelAnnotation();
-#endif
-#endif
 
       // Run the UI event loop on the main thread.
       uiMessageLoop.MessageLoop::Run();

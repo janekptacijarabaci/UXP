@@ -4,10 +4,10 @@
 
 "use strict";
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
-const Cr = Components.results;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
+var Cr = Components.results;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
@@ -18,12 +18,12 @@ Cu.import("resource://gre/modules/addons/AddonRepository.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "PluralForm",
                                   "resource://gre/modules/PluralForm.jsm");
 
+#ifdef MOZ_DEVTOOLS
 XPCOMUtils.defineLazyGetter(this, "BrowserToolboxProcess", function () {
-  return Cu.import("resource://gre/modules/devtools/ToolboxProcess.jsm", {}).
+  return Cu.import("resource://devtools/client/framework/ToolboxProcess.jsm", {}).
          BrowserToolboxProcess;
 });
-XPCOMUtils.defineLazyModuleGetter(this, "Experiments",
-  "resource:///modules/experiments/Experiments.jsm");
+#endif
 
 const PREF_DISCOVERURL = "extensions.webservice.discoverURL";
 const PREF_DISCOVER_ENABLED = "extensions.getAddons.showPane";
@@ -214,23 +214,6 @@ function isDiscoverEnabled() {
   } catch (e) {}
 
   return true;
-}
-
-function getExperimentEndDate(aAddon) {
-  if (!("@mozilla.org/browser/experiments-service;1" in Cc)) {
-    return 0;
-  }
-
-  if (!aAddon.isActive) {
-    return aAddon.endDate;
-  }
-
-  let experiment = Experiments.instance().getActiveExperiment();
-  if (!experiment) {
-    return 0;
-  }
-
-  return experiment.endDate;
 }
 
 /**
@@ -1021,6 +1004,7 @@ var gViewController = {
       }
     },
 
+#ifdef MOZ_DEVTOOLS
     cmd_debugItem: {
       doCommand: function cmd_debugItem_doCommand(aAddon) {
         BrowserToolboxProcess.init({ addonID: aAddon.id });
@@ -1034,6 +1018,7 @@ var gViewController = {
         return aAddon && aAddon.isDebuggable && debuggerEnabled && remoteEnabled;
       }
     },
+#endif
 
     cmd_showItemPreferences: {
       isEnabled: function cmd_showItemPreferences_isEnabled(aAddon) {
@@ -1316,28 +1301,7 @@ var gViewController = {
       doCommand: function cmd_neverActivateItem_doCommand(aAddon) {
         aAddon.userDisabled = true;
       }
-    },
-
-    cmd_experimentsLearnMore: {
-      isEnabled: function cmd_experimentsLearnMore_isEnabled() {
-        let mainWindow = getMainWindow();
-        return mainWindow && "switchToTabHavingURI" in mainWindow;
-      },
-      doCommand: function cmd_experimentsLearnMore_doCommand() {
-        let url = Services.prefs.getCharPref("toolkit.telemetry.infoURL");
-        openOptionsInTab(url);
-      },
-    },
-
-    cmd_experimentsOpenTelemetryPreferences: {
-      isEnabled: function cmd_experimentsOpenTelemetryPreferences_isEnabled() {
-        return !!getMainWindowWithPreferencesPane();
-      },
-      doCommand: function cmd_experimentsOpenTelemetryPreferences_doCommand() {
-        let mainWindow = getMainWindowWithPreferencesPane();
-        mainWindow.openAdvancedPreferences("dataChoicesTab");
-      },
-    },
+    }
   },
 
   supportsCommand: function gVC_supportsCommand(aCommand) {
@@ -1467,10 +1431,6 @@ function createItem(aObj, aIsInstall, aIsRemote) {
   // set only attributes needed for sorting and XBL binding,
   // the binding handles the rest
   item.setAttribute("value", aObj.id);
-
-  if (aObj.type == "experiment") {
-    item.endDate = getExperimentEndDate(aObj);
-  }
 
   return item;
 }
@@ -2500,7 +2460,7 @@ var gSearchView = {
     this._allResultsLink.setAttribute("href",
                                       AddonRepository.getSearchURL(this._lastQuery));
     this._allResultsLink.hidden = false;
- },
+  },
 
   updateListAttributes: function gSearchView_updateListAttributes() {
     var item = this._listBox.querySelector("richlistitem[remote='true'][first]");
@@ -2679,13 +2639,6 @@ var gListView = {
     // the existing item
     if (aInstall.existingAddon)
       this.removeItem(aInstall, true);
-
-    if (aInstall.addon.type == "experiment") {
-      let item = this.getListItemForID(aInstall.addon.id);
-      if (item) {
-        item.endDate = getExperimentEndDate(aInstall.addon);
-      }
-    }
   },
 
   addItem: function gListView_addItem(aObj, aIsInstall) {
@@ -2943,34 +2896,6 @@ var gDetailView = {
       } else {
         gridRow.removeAttribute("first-row");
       }
-    }
-
-    if (this._addon.type == "experiment") {
-      let prefix = "details.experiment.";
-      let active = this._addon.isActive;
-
-      let stateKey = prefix + "state." + (active ? "active" : "complete");
-      let node = document.getElementById("detail-experiment-state");
-      node.value = gStrings.ext.GetStringFromName(stateKey);
-
-      let now = Date.now();
-      let end = getExperimentEndDate(this._addon);
-      let days = Math.abs(end - now) / (24 * 60 * 60 * 1000);
-
-      let timeKey = prefix + "time.";
-      let timeMessage;
-      if (days < 1) {
-        timeKey += (active ? "endsToday" : "endedToday");
-        timeMessage = gStrings.ext.GetStringFromName(timeKey);
-      } else {
-        timeKey += (active ? "daysRemaining" : "daysPassed");
-        days = Math.round(days);
-        let timeString = gStrings.ext.GetStringFromName(timeKey);
-        timeMessage = PluralForm.get(days, timeString)
-                                .replace("#1", days);
-      }
-
-      document.getElementById("detail-experiment-time").value = timeMessage;
     }
 
     this.fillSettingsRows(aScrollToPreferences, (function updateView_fillSettingsRows() {

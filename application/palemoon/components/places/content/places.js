@@ -4,7 +4,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource:///modules/MigrationUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "Task",
                                   "resource://gre/modules/Task.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "BookmarkJSONUtils",
@@ -332,14 +331,6 @@ var PlacesOrganizer = {
    */
   getCurrentQueries: function PO_getCurrentQueries() {
     return PlacesUtils.asQuery(ContentArea.currentView.result.root).getQueries();
-  },
-
-  /**
-   * Show the migration wizard for importing passwords,
-   * cookies, history, preferences, and bookmarks.
-   */
-  importFromBrowser: function PO_importFromBrowser() {
-    MigrationUtils.showMigrationWizard(window);
   },
 
   /**
@@ -1386,7 +1377,7 @@ var ViewMenu = {
   }
 }
 
-let ContentArea = {
+var ContentArea = {
   _specialViews: new Map(),
 
   init: function CA_init() {
@@ -1520,7 +1511,7 @@ let ContentArea = {
   }
 };
 
-let ContentTree = {
+var ContentTree = {
   init: function CT_init() {
     this._view = document.getElementById("placeContent");
   },
