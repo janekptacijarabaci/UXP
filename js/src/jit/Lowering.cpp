@@ -2687,7 +2687,7 @@ IsNonNurseryConstant(MDefinition* def)
     if (!def->isConstant())
         return false;
     Value v = def->toConstant()->toJSValue();
-    return !v.isMarkable() || !IsInsideNursery(v.toMarkablePointer());
+    return !v.isGCThing() || !IsInsideNursery(v.toGCThing());
 }
 
 void
@@ -4168,6 +4168,16 @@ LIRGenerator::visitHasClass(MHasClass* ins)
     MOZ_ASSERT(ins->object()->type() == MIRType::Object);
     MOZ_ASSERT(ins->type() == MIRType::Boolean);
     define(new(alloc()) LHasClass(useRegister(ins->object())), ins);
+}
+
+void
+LIRGenerator::visitGuardToClass(MGuardToClass* ins)
+{
+    MOZ_ASSERT(ins->object()->type() == MIRType::Object);
+    MOZ_ASSERT(ins->type() == MIRType::ObjectOrNull|| ins->type() == MIRType::Object);
+    LGuardToClass* lir = new(alloc()) LGuardToClass(useRegister(ins->object()), temp());
+    assignSnapshot(lir, Bailout_TypeBarrierO);
+    define(lir, ins);
 }
 
 void

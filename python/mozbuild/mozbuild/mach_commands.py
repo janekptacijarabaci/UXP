@@ -536,14 +536,20 @@ class Build(MachCommandBase):
                 # arguably make the build action useful for Fennec. Another day...
                 if self.substs['MOZ_BUILD_APP'] != 'mobile/android':
                     print('To take your build for a test drive, run: |mach run|')
-                app = self.substs['MOZ_BUILD_APP']
-                if app in ('browser', 'mobile/android'):
-                    print('For more information on what to do now, see '
-                        'https://developer.mozilla.org/docs/Developer_Guide/So_You_Just_Built_Firefox')
             except Exception:
                 # Ignore Exceptions in case we can't find config.status (such
                 # as when doing OSX Universal builds)
                 pass
+
+        # Check if there are any unpreprocessed files in '@MOZ_OBJDIR@/dist/bin'
+        # See python/mozbuild/mozbuild/preprocessor.py#L293-L309 for the list of directives
+        # We skip if, ifdef, ifndef, else, elif, elifdef and elifndef, because they are never used alone
+        grepcmd = 'grep -E -r "^(#|%)(define|endif|error|expand|filter|include|literal|undef|unfilter)" '\
+                  + '--include=\*.{css,dtd,html,js,jsm,xhtml,xml,xul,manifest,properties,rdf} '\
+                  + self.topobjdir + '/dist/bin | grep -v ".css:#"'
+        grepresult = subprocess.Popen(grepcmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
+        if grepresult:
+            print('\nERROR: preprocessor was not applied to the following files:\n\n' + grepresult)
 
         return status
 

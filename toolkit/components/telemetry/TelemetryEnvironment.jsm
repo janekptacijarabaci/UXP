@@ -28,11 +28,9 @@ XPCOMUtils.defineLazyModuleGetter(this, "AttributionCode",
                                   "resource:///modules/AttributionCode.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "ctypes",
                                   "resource://gre/modules/ctypes.jsm");
-if (AppConstants.platform !== "gonk") {
-  Cu.import("resource://gre/modules/AddonManager.jsm");
-  XPCOMUtils.defineLazyModuleGetter(this, "LightweightThemeManager",
-                                    "resource://gre/modules/LightweightThemeManager.jsm");
-}
+Cu.import("resource://gre/modules/AddonManager.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "LightweightThemeManager",
+                                  "resource://gre/modules/LightweightThemeManager.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "ProfileAge",
                                   "resource://gre/modules/ProfileAge.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "UpdateUtils",
@@ -153,7 +151,6 @@ const DEFAULT_ENVIRONMENT_PREFS = new Map([
   ["dom.ipc.plugins.enabled", {what: RECORD_PREF_VALUE}],
   ["dom.ipc.processCount", {what: RECORD_PREF_VALUE, requiresRestart: true}],
   ["dom.max_script_run_time", {what: RECORD_PREF_VALUE}],
-  ["experiments.manifest.uri", {what: RECORD_PREF_VALUE}],
   ["extensions.autoDisableScopes", {what: RECORD_PREF_VALUE}],
   ["extensions.enabledScopes", {what: RECORD_PREF_VALUE}],
   ["extensions.blocklist.enabled", {what: RECORD_PREF_VALUE}],
@@ -209,7 +206,6 @@ const PREF_E10S_COHORT = "e10s.rollout.cohort";
 
 const COMPOSITOR_CREATED_TOPIC = "compositor:created";
 const DISTRIBUTION_CUSTOMIZATION_COMPLETE_TOPIC = "distribution-customization-complete";
-const EXPERIMENTS_CHANGED_TOPIC = "experiments-changed";
 const GFX_FEATURES_READY_TOPIC = "gfx-features-ready";
 const SEARCH_ENGINE_MODIFIED_TOPIC = "browser-search-engine-modified";
 const SEARCH_SERVICE_TOPIC = "browser-search-service";
@@ -465,7 +461,6 @@ EnvironmentAddonBuilder.prototype = {
   watchForChanges: function() {
     this._loaded = true;
     AddonManager.addAddonListener(this);
-    Services.obs.addObserver(this, EXPERIMENTS_CHANGED_TOPIC, false);
   },
 
   // AddonListener
@@ -490,7 +485,6 @@ EnvironmentAddonBuilder.prototype = {
   // nsIObserver
   observe: function (aSubject, aTopic, aData) {
     this._environment._log.trace("observe - Topic " + aTopic);
-    this._checkForChanges("experiment-changed");
   },
 
   _checkForChanges: function(changeReason) {
@@ -515,7 +509,6 @@ EnvironmentAddonBuilder.prototype = {
   _shutdownBlocker: function() {
     if (this._loaded) {
       AddonManager.removeAddonListener(this);
-      Services.obs.removeObserver(this, EXPERIMENTS_CHANGED_TOPIC);
     }
     return this._pendingTask;
   },
@@ -533,11 +526,9 @@ EnvironmentAddonBuilder.prototype = {
   _updateAddons: Task.async(function* () {
     this._environment._log.trace("_updateAddons");
     let personaId = null;
-    if (AppConstants.platform !== "gonk") {
-      let theme = LightweightThemeManager.currentTheme;
-      if (theme) {
-        personaId = theme.id;
-      }
+    let theme = LightweightThemeManager.currentTheme;
+    if (theme) {
+      personaId = theme.id;
     }
 
     let addons = {
@@ -545,7 +536,6 @@ EnvironmentAddonBuilder.prototype = {
       theme: yield this._getActiveTheme(),
       activePlugins: this._getActivePlugins(),
       activeGMPlugins: yield this._getActiveGMPlugins(),
-      activeExperiment: this._getActiveExperiment(),
       persona: personaId,
     };
 
@@ -718,29 +708,7 @@ EnvironmentAddonBuilder.prototype = {
     }
 
     return activeGMPlugins;
-  }),
-
-  /**
-   * Get the active experiment data in object form.
-   * @return Object containing the active experiment data.
-   */
-  _getActiveExperiment: function () {
-    let experimentInfo = {};
-    try {
-      let scope = {};
-      Cu.import("resource:///modules/experiments/Experiments.jsm", scope);
-      let experiments = scope.Experiments.instance();
-      let activeExperiment = experiments.getActiveExperimentID();
-      if (activeExperiment) {
-        experimentInfo.id = activeExperiment;
-        experimentInfo.branch = experiments.getActiveExperimentBranch();
-      }
-    } catch (e) {
-      // If this is not Firefox, the import will fail.
-    }
-
-    return experimentInfo;
-  },
+  })
 };
 
 function EnvironmentCache() {
@@ -773,14 +741,8 @@ function EnvironmentCache() {
   // until the initial environment has been built.
 
   let p = [];
-  if (AppConstants.platform === "gonk") {
-    this._addonBuilder = {
-      watchForChanges: function() {}
-    };
-  } else {
-    this._addonBuilder = new EnvironmentAddonBuilder(this);
-    p = [ this._addonBuilder.init() ];
-  }
+  this._addonBuilder = new EnvironmentAddonBuilder(this);
+  p = [ this._addonBuilder.init() ];
 
   this._currentEnvironment.profile = {};
   p.push(this._updateProfile());
@@ -1107,10 +1069,6 @@ EnvironmentCache.prototype = {
    * @returns null on error, true if we are the default browser, or false otherwise.
    */
   _isDefaultBrowser: function () {
-    if (AppConstants.platform === "gonk") {
-      return true;
-    }
-
     if (!("@mozilla.org/browser/shell-service;1" in Cc)) {
       this._log.info("_isDefaultBrowser - Could not obtain browser shell service");
       return null;
@@ -1167,10 +1125,8 @@ EnvironmentCache.prototype = {
       userPrefs: this._getPrefData(),
     };
 
-    if (AppConstants.platform !== "gonk") {
-      this._currentEnvironment.settings.addonCompatibilityCheckEnabled =
-        AddonManager.checkCompatibility;
-    }
+    this._currentEnvironment.settings.addonCompatibilityCheckEnabled =
+      AddonManager.checkCompatibility;
 
     if (AppConstants.platform !== "android") {
       this._currentEnvironment.settings.isDefaultBrowser =
@@ -1274,7 +1230,7 @@ EnvironmentCache.prototype = {
    * not a portable device.
    */
   _getDeviceData: function () {
-    if (!["gonk", "android"].includes(AppConstants.platform)) {
+    if (!["android"].includes(AppConstants.platform)) {
       return null;
     }
 
@@ -1297,7 +1253,7 @@ EnvironmentCache.prototype = {
       locale: forceToStringOrNull(getSystemLocale()),
     };
 
-    if (["gonk", "android"].includes(AppConstants.platform)) {
+    if (["android"].includes(AppConstants.platform)) {
       data.kernelVersion = forceToStringOrNull(getSysinfoProperty("kernel_version", null));
     } else if (AppConstants.platform === "win") {
       // The path to the "UBR" key, queried to get additional version details on Windows.
@@ -1361,7 +1317,7 @@ EnvironmentCache.prototype = {
       features: {},
     };
 
-    if (!["gonk", "android", "linux"].includes(AppConstants.platform)) {
+    if (!["android", "linux"].includes(AppConstants.platform)) {
       let gfxInfo = Cc["@mozilla.org/gfx/info;1"].getService(Ci.nsIGfxInfo);
       try {
         gfxData.monitors = gfxInfo.getMonitors();
@@ -1426,7 +1382,7 @@ EnvironmentCache.prototype = {
 
     if (AppConstants.platform === "win") {
       data.isWow64 = getSysinfoProperty("isWow64", null);
-    } else if (["gonk", "android"].includes(AppConstants.platform)) {
+    } else if (["android"].includes(AppConstants.platform)) {
       data.device = this._getDeviceData();
     }
 

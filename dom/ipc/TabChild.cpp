@@ -52,9 +52,6 @@
 #include "nsEmbedCID.h"
 #include "nsGlobalWindow.h"
 #include <algorithm>
-#ifdef MOZ_CRASHREPORTER
-#include "nsExceptionHandler.h"
-#endif
 #include "nsFilePickerProxy.h"
 #include "mozilla/dom/Element.h"
 #include "nsGlobalWindow.h"
@@ -99,7 +96,6 @@
 #include "LayersLogging.h"
 #include "nsDOMClassInfoID.h"
 #include "nsColorPickerProxy.h"
-#include "nsDatePickerProxy.h"
 #include "nsContentPermissionHelper.h"
 #include "nsPresShell.h"
 #include "nsIAppsService.h"
@@ -1261,10 +1257,6 @@ TabChild::RecvLoadURL(const nsCString& aURI,
       NS_WARNING("WebNavigation()->LoadURI failed. Eating exception, what else can I do?");
   }
 
-#ifdef MOZ_CRASHREPORTER
-  CrashReporter::AnnotateCrashReport(NS_LITERAL_CSTRING("URL"), aURI);
-#endif
-
   return true;
 }
 
@@ -2016,21 +2008,6 @@ bool
 TabChild::DeallocPColorPickerChild(PColorPickerChild* aColorPicker)
 {
   nsColorPickerProxy* picker = static_cast<nsColorPickerProxy*>(aColorPicker);
-  NS_RELEASE(picker);
-  return true;
-}
-
-PDatePickerChild*
-TabChild::AllocPDatePickerChild(const nsString&, const nsString&)
-{
-  NS_RUNTIMEABORT("unused");
-  return nullptr;
-}
-
-bool
-TabChild::DeallocPDatePickerChild(PDatePickerChild* aDatePicker)
-{
-  nsDatePickerProxy* picker = static_cast<nsDatePickerProxy*>(aDatePicker);
   NS_RELEASE(picker);
   return true;
 }

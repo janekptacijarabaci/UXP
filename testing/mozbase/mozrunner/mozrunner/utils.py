@@ -101,10 +101,7 @@ def test_environment(xrePath, env=None, crashreporter=True, debugger=False,
     envVar = None
     dmdLibrary = None
     preloadEnvVar = None
-    if 'toolkit' in mozinfo.info and mozinfo.info['toolkit'] == "gonk":
-        # Skip all of this, it's only valid for the host.
-        pass
-    elif mozinfo.isUnix:
+    if mozinfo.isUnix:
         envVar = "LD_LIBRARY_PATH"
         env['MOZILLA_FIVE_HOME'] = xrePath
         dmdLibrary = "libdmd.so"
@@ -132,7 +129,6 @@ def test_environment(xrePath, env=None, crashreporter=True, debugger=False,
 
     if crashreporter and not debugger:
         env['MOZ_CRASHREPORTER_NO_REPORT'] = '1'
-        env['MOZ_CRASHREPORTER'] = '1'
     else:
         env['MOZ_CRASHREPORTER_DISABLE'] = '1'
 
