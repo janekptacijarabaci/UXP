@@ -20,18 +20,6 @@
 #include "mozilla/Unused.h"
 #include "nsPrintfCString.h"
 
-#if defined(MOZ_SANDBOX) && defined(XP_WIN)
-#define TARGET_SANDBOX_EXPORTS
-#include "mozilla/sandboxTarget.h"
-#endif
-
-#if defined(MOZ_CRASHREPORTER) && defined(XP_WIN)
-#include "aclapi.h"
-#include "sddl.h"
-
-#include "mozilla/TypeTraits.h"
-#endif
-
 #include "nsAutoPtr.h"
 
 using namespace IPC;
@@ -41,16 +29,6 @@ using base::ProcessHandle;
 using base::ProcessId;
 
 namespace mozilla {
-
-#if defined(MOZ_CRASHREPORTER) && defined(XP_WIN)
-// Generate RAII classes for LPTSTR and PSECURITY_DESCRIPTOR.
-MOZ_TYPE_SPECIFIC_SCOPED_POINTER_TEMPLATE(ScopedLPTStr, \
-                                          RemovePointer<LPTSTR>::Type, \
-                                          ::LocalFree)
-MOZ_TYPE_SPECIFIC_SCOPED_POINTER_TEMPLATE(ScopedPSecurityDescriptor, \
-                                          RemovePointer<PSECURITY_DESCRIPTOR>::Type, \
-                                          ::LocalFree)
-#endif
 
 namespace ipc {
 
@@ -179,61 +157,17 @@ bool DuplicateHandle(HANDLE aSourceHandle,
 
   }
 
-#if defined(MOZ_SANDBOX)
-  // Try the broker next (will fail if not sandboxed).
-  if (SandboxTarget::Instance()->BrokerDuplicateHandle(aSourceHandle,
-                                                       aTargetProcessId,
-                                                       aTargetHandle,
-                                                       aDesiredAccess,
-                                                       aOptions)) {
-    return true;
-  }
-#endif
-
   // Finally, see if we already have access to the process.
   ScopedProcessHandle targetProcess(OpenProcess(PROCESS_DUP_HANDLE,
                                                 FALSE,
                                                 aTargetProcessId));
   if (!targetProcess) {
-#ifdef MOZ_CRASHREPORTER
-    CrashReporter::AnnotateCrashReport(
-      NS_LITERAL_CSTRING("IPCTransportFailureReason"),
-      NS_LITERAL_CSTRING("Failed to open target process."));
-#endif
     return false;
   }
 
   return !!::DuplicateHandle(::GetCurrentProcess(), aSourceHandle,
                               targetProcess, aTargetHandle,
                               aDesiredAccess, FALSE, aOptions);
-}
-#endif
-
-#ifdef MOZ_CRASHREPORTER
-void
-AnnotateSystemError()
-{
-  int64_t error = 0;
-#if defined(XP_WIN)
-  error = ::GetLastError();
-#elif defined(OS_POSIX)
-  error = errno;
-#endif
-  if (error) {
-    CrashReporter::AnnotateCrashReport(
-      NS_LITERAL_CSTRING("IPCSystemError"),
-      nsPrintfCString("%lld", error));
-  }
-}
-#endif
-
-#if defined(MOZ_CRASHREPORTER) && defined(XP_MACOSX)
-void
-AnnotateCrashReportWithErrno(const char* tag, int error)
-{
-  CrashReporter::AnnotateCrashReport(
-    nsCString(tag),
-    nsPrintfCString("%d", error));
 }
 #endif
 
@@ -274,18 +208,6 @@ FatalError(const char* aProtocolName, const char* aMsg, bool aIsParent)
   formattedMessage.AppendLiteral("]: \"");
   formattedMessage.AppendASCII(aMsg);
   if (aIsParent) {
-#ifdef MOZ_CRASHREPORTER
-    // We're going to crash the parent process because at this time
-    // there's no other really nice way of getting a minidump out of
-    // this process if we're off the main thread.
-    formattedMessage.AppendLiteral("\". Intentionally crashing.");
-    NS_ERROR(formattedMessage.get());
-    CrashReporter::AnnotateCrashReport(NS_LITERAL_CSTRING("IPCFatalErrorProtocol"),
-                                       nsDependentCString(aProtocolName));
-    CrashReporter::AnnotateCrashReport(NS_LITERAL_CSTRING("IPCFatalErrorMsg"),
-                                       nsDependentCString(aMsg));
-    AnnotateSystemError();
-#endif
     MOZ_CRASH("IPC FatalError in the parent process!");
   } else {
     formattedMessage.AppendLiteral("\". abort()ing as a result.");
@@ -540,12 +462,9 @@ IToplevelProtocol::SetOtherProcessId(base::ProcessId aOtherPid)
 bool
 IToplevelProtocol::TakeMinidump(nsIFile** aDump, uint32_t* aSequence)
 {
+  /*** STUB ***/
   MOZ_RELEASE_ASSERT(GetSide() == ParentSide);
-#ifdef MOZ_CRASHREPORTER
-  return XRE_TakeMinidumpForChild(OtherPid(), aDump, aSequence);
-#else
   return false;
-#endif
 }
 
 bool

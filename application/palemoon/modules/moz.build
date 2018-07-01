@@ -5,10 +5,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-# XXX: Include this until we convert browser/ to use toolkit promises directly
-EXTRA_JS_MODULES += [ 'promise.js' ]
-
 EXTRA_JS_MODULES += [
+    'AutoCompletePopup.jsm',
     'BrowserNewTabPreloader.jsm',
     'CharsetMenu.jsm',
     'FormSubmitObserver.jsm',
@@ -19,9 +17,11 @@ EXTRA_JS_MODULES += [
     'PageMenu.jsm',
     'PopupNotifications.jsm',
     'QuotaManager.jsm',
-    'SharedFrame.jsm',
-    'webrtcUI.jsm'
+    'SharedFrame.jsm'
 ]
+
+if CONFIG['MOZ_WEBRTC']:
+    EXTRA_JS_MODULES += ['webrtcUI.jsm']
 
 if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'windows':
     EXTRA_JS_MODULES += [
@@ -35,5 +35,8 @@ EXTRA_PP_JS_MODULES += [
     'RecentWindow.jsm',
 ]
 
+# Pass down 'official build' flags
+if CONFIG['MC_OFFICIAL']:
+    DEFINES['MC_OFFICIAL'] = 1
 if CONFIG['MOZILLA_OFFICIAL']:
     DEFINES['MOZILLA_OFFICIAL'] = 1

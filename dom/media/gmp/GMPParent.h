@@ -25,17 +25,6 @@
 
 class nsIThread;
 
-#ifdef MOZ_CRASHREPORTER
-#include "nsExceptionHandler.h"
-
-namespace mozilla {
-namespace dom {
-class PCrashReporterParent;
-class CrashReporterParent;
-}
-}
-#endif
-
 namespace mozilla {
 namespace gmp {
 
@@ -177,14 +166,7 @@ private:
   RefPtr<GenericPromise> ReadGMPInfoFile(nsIFile* aFile);
   RefPtr<GenericPromise> ParseChromiumManifest(nsString aJSON); // Main thread.
   RefPtr<GenericPromise> ReadChromiumManifestFile(nsIFile* aFile); // GMP thread.
-#ifdef MOZ_CRASHREPORTER
-  void WriteExtraDataForMinidump(CrashReporter::AnnotationTable& notes);
-  void GetCrashID(nsString& aResult);
-#endif
   void ActorDestroy(ActorDestroyReason aWhy) override;
-
-  PCrashReporterParent* AllocPCrashReporterParent(const NativeThreadId& aThread) override;
-  bool DeallocPCrashReporterParent(PCrashReporterParent* aCrashReporter) override;
 
   bool RecvPGMPStorageConstructor(PGMPStorageParent* actor) override;
   PGMPStorageParent* AllocPGMPStorageParent() override;

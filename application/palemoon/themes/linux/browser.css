@@ -728,9 +728,11 @@ toolbar[mode="full"] .toolbarbutton-1 > .toolbarbutton-menubutton-button {
   opacity: .4;
 }
 
+%ifdef MOZ_WEBRTC
 #webrtc-status-button {
   -moz-image-region: rect(0px 192px 24px 168px);
 }
+%endif
 
 /* 16px primary toolbar buttons */
 toolbar[iconsize="small"] .toolbarbutton-1:not([type="menu-button"]) {
@@ -812,7 +814,9 @@ toolbar[iconsize="small"] #downloads-button {
   -moz-image-region: rect(0px 16px 16px 0px);
 }
 
+%ifdef MOZ_WEBRTC
 toolbar[iconsize="small"] #webrtc-status-button /* temporary placeholder (bug 824825) */,
+%endif
 toolbar[iconsize="small"] #history-button,
 toolbar[iconsize="small"] #history-menu-button {
   -moz-image-region: rect(0px 32px 16px 16px);
@@ -884,9 +888,11 @@ toolbar[iconsize="small"] #feed-button {
   -moz-image-region: rect(0px 112px 16px 96px);
 }
 
+%ifdef MOZ_WEBRTC
 toolbar[iconsize="small"] #webrtc-status-button {
   -moz-image-region: rect(0px 128px 16px 112px);
 }
+%endif
 
 /* Fullscreen window controls */
 #window-controls {
@@ -1163,6 +1169,10 @@ toolbar[iconsize="small"] #webrtc-status-button {
   list-style-image: url(chrome://browser/skin/Geolocation-64.png);
 }
 
+.popup-notification-icon[popupid="push"] {
+  list-style-image: url(chrome://browser/skin/Push-64.png);
+}
+
 .popup-notification-icon[popupid="xpinstall-disabled"],
 .popup-notification-icon[popupid="addon-progress"],
 .popup-notification-icon[popupid="addon-install-cancelled"],
@@ -1218,18 +1228,16 @@ toolbar[iconsize="small"] #webrtc-status-button {
   list-style-image: url(chrome://mozapps/skin/passwordmgr/key-64.png);
 }
 
-.popup-notification-icon[popupid="webapps-install"] {
-  list-style-image: url(chrome://browser/skin/webapps-64.png);
-}
-
 .popup-notification-icon[popupid="mixed-content-blocked"] {
   list-style-image: url(chrome://browser/skin/mixed-content-blocked-64.png);
 }
 
+%ifdef MOZ_WEBRTC
 .popup-notification-icon[popupid="webRTC-sharingDevices"],
 .popup-notification-icon[popupid="webRTC-shareDevices"] {
   list-style-image: url(chrome://browser/skin/webRTC-shareDevice-64.png);
 }
+%endif
 
 .popup-notification-icon[popupid="pointerLock"] {
   list-style-image: url(chrome://browser/skin/pointerLock-64.png);
@@ -1293,10 +1301,6 @@ toolbar[iconsize="small"] #webrtc-status-button {
   list-style-image: url(chrome://mozapps/skin/passwordmgr/key-16.png);
 }
 
-#webapps-notification-icon {
-  list-style-image: url(chrome://browser/skin/webapps-16.png);
-}
-
 #plugins-notification-icon {
   list-style-image: url(chrome://browser/skin/notification-pluginNormal.png);
 }
@@ -1352,6 +1356,7 @@ toolbar[iconsize="small"] #webrtc-status-button {
   list-style-image: url(chrome://browser/skin/mixed-content-blocked-16.png);
 }
 
+%ifdef MOZ_WEBRTC
 .webRTC-shareDevices-notification-icon,
 #webRTC-shareDevices-notification-icon {
   list-style-image: url(chrome://browser/skin/webRTC-shareDevice-16.png);
@@ -1361,10 +1366,22 @@ toolbar[iconsize="small"] #webrtc-status-button {
 #webRTC-sharingDevices-notification-icon {
   list-style-image: url(chrome://browser/skin/webRTC-sharingDevice-16.png);
 }
+%endif
 
 .web-notifications-notification-icon,
 #web-notifications-notification-icon {
-  list-style-image: url(chrome://browser/skin/notification-16.png);
+  list-style-image: url(chrome://browser/skin/web-notifications-tray.svg);
+  -moz-image-region: rect(0, 16px, 16px, 0);
+}
+
+.web-notifications-notification-icon:hover,
+#web-notifications-notification-icon:hover {
+  -moz-image-region: rect(0, 32px, 16px, 16px);
+}
+
+.web-notifications-notification-icon:hover:active,
+#web-notifications-notification-icon:hover:active {
+  -moz-image-region: rect(0, 48px, 16px, 32px);
 }
 
 #pointerLock-notification-icon {
@@ -1549,32 +1566,15 @@ richlistitem[type~="action"][actiontype="switchtab"] > .ac-url-box > .ac-action-
   min-width: 27em;
 }
 
-.panel-promo-box {
-  margin: 8px -10px -10px -10px;
-  padding: 8px 10px;
-  border-top: 1px solid ThreeDShadow;
-  background-image: linear-gradient(hsla(0,0%,0%,.15), hsla(0,0%,0%,.08) 6px);
-}
-
-.panel-promo-icon {
-  list-style-image: url("chrome://browser/skin/sync-notification-24.png");
-  -moz-margin-end: 10px;
-  vertical-align: middle;
-}
-
-.panel-promo-closebutton {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.panel-promo-closebutton > .toolbarbutton-text {
-  padding: 0;
-  margin: 0;
-}
-
 /* Content area */
 #sidebar {
   background-color: Window;
+}
+
+.browserContainer > findbar {
+  background-color: -moz-dialog;
+  color: -moz-DialogText;
+  text-shadow: none;
 }
 
 /* Throbber */
@@ -2065,10 +2065,6 @@ toolbar[mode="text"] toolbarbutton.chevron > .toolbarbutton-icon {
   box-shadow: 0 0 2px white;
 }
 
-#full-screen-warning-container[obscure-browser] {
-  background-color: rgba(0,0,0,0.3);
-}
-
 .full-screen-description {
   font-size: 150%;
 }
@@ -2077,14 +2073,9 @@ toolbar[mode="text"] toolbarbutton.chevron > .toolbarbutton-icon {
   font-size: 300%;
 }
 
-.full-screen-approval-button,
-#full-screen-remember-decision {
-  font-size: 120%;
-}
-
 %ifdef MOZ_DEVTOOLS
-%include ../../../toolkit/themes/shared/devtools/responsivedesign.inc.css
-%include ../../../toolkit/themes/shared/devtools/commandline.inc.css
+%include ../../../../devtools/client/themes/responsivedesign.inc.css
+%include ../../../../devtools/client/themes/commandline.inc.css
 %endif
 %include ../shared/plugin-doorhanger.inc.css
 
@@ -2109,12 +2100,12 @@ toolbar[mode="text"] toolbarbutton.chevron > .toolbarbutton-icon {
 }
 %endif
 
-.toolbarbutton-badge-container {
+.toolbarbutton-badge-stack {
   margin: 5px 3px;
   position: relative;
 }
 
-toolbar[iconsize="small"] .toolbarbutton-badge-container {
+toolbar[iconsize="small"] .toolbarbutton-badge-stack {
   margin: 0;
 }
 
