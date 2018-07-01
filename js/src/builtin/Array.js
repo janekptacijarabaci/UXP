@@ -1074,8 +1074,8 @@ function ArrayConcat(arg1) {
 }
 
 // https://tc39.github.io/proposal-flatMap/
-// January 16, 2018
-function ArrayFlatMap(mapperFunction/*, thisArg*/) {
+// May 23, 2018
+function ArrayFlat(/* depth */) {
     // Step 1.
     var O = ToObject(this);
 
