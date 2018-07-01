@@ -1074,8 +1074,8 @@ function ArrayConcat(arg1) {
 }
 
 // https://tc39.github.io/proposal-flatMap/
-// May 23, 2018
-function ArrayFlat(/* depth */) {
+// January 16, 2018
+function ArrayFlatMap(mapperFunction/*, thisArg*/) {
     // Step 1.
     var O = ToObject(this);
 
@@ -1100,8 +1100,8 @@ function ArrayFlat(/* depth */) {
 }
 
 // https://tc39.github.io/proposal-flatMap/
-// January 16, 2018
-function ArrayFlatten(/* depth */) {
+// May 23, 2018
+function ArrayFlat(/* depth */) {
      // Step 1.
     var O = ToObject(this);
 
