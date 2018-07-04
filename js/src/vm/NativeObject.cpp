@@ -2344,9 +2344,12 @@ SetDenseOrTypedArrayElement(JSContext* cx, HandleNativeObject obj, uint32_t inde
         // current behavior.  (ES6 currently says to throw for this in
         // strict mode code, so we may eventually need to change.)
         uint32_t len = obj->as<TypedArrayObject>().length();
-        if (index < len)
+        if (index < len) { 
             TypedArrayObject::setElement(obj->as<TypedArrayObject>(), index, d);
-        return result.succeed();
+            return result.succeed();
+        }
+
+        return result.failSoft(JSMSG_BAD_INDEX);
     }
 
     if (WouldDefinePastNonwritableLength(obj, index))
