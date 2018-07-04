@@ -45,7 +45,7 @@ Reflect_defineProperty(JSContext* cx, unsigned argc, Value* vp)
     ObjectOpResult result;
     if (!DefineProperty(cx, obj, key, desc, result))
         return false;
-    args.rval().setBoolean(bool(result));
+    args.rval().setBoolean(result.reallyOk());
     return true;
 }
 
@@ -70,7 +70,7 @@ Reflect_deleteProperty(JSContext* cx, unsigned argc, Value* vp)
     ObjectOpResult result;
     if (!DeleteProperty(cx, target, key, result))
         return false;
-    args.rval().setBoolean(bool(result));
+    args.rval().setBoolean(result.reallyOk());
     return true;
 }
 
@@ -179,7 +179,7 @@ Reflect_preventExtensions(JSContext* cx, unsigned argc, Value* vp)
     ObjectOpResult result;
     if (!PreventExtensions(cx, target, result))
         return false;
-    args.rval().setBoolean(bool(result));
+    args.rval().setBoolean(result.reallyOk());
     return true;
 }
 
@@ -208,7 +208,7 @@ Reflect_set(JSContext* cx, unsigned argc, Value* vp)
     RootedValue value(cx, args.get(2));
     if (!SetProperty(cx, target, key, value, receiver, result))
         return false;
-    args.rval().setBoolean(bool(result));
+    args.rval().setBoolean(result.reallyOk());
     return true;
 }
 
@@ -241,7 +241,7 @@ Reflect_setPrototypeOf(JSContext* cx, unsigned argc, Value* vp)
     ObjectOpResult result;
     if (!SetPrototype(cx, obj, proto, result))
         return false;
-    args.rval().setBoolean(bool(result));
+    args.rval().setBoolean(result.reallyOk());
     return true;
 }
 
