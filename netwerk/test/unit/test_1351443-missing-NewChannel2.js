@@ -1,7 +1,9 @@
 /*
- * Tests for bug 894586: nsSyncLoadService::PushSyncStreamToListener
- * should not fail for channels of unknown size
+ * Tests for bug 1351443: NewChannel2 should only fallback to NewChannel if
+ * NewChannel2() is unimplemented.
  */
+
+"use strict";
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -20,7 +22,7 @@ function ProtocolHandler() {
 ProtocolHandler.prototype = {
   /** nsIProtocolHandler */
   get scheme() {
-    return "x-bug894586";
+    return "x-1351443";
   },
   get defaultPort() {
     return -1;
@@ -39,6 +41,12 @@ ProtocolHandler.prototype = {
   newChannel2: function(aURI, aLoadInfo) {
     this.loadInfo = aLoadInfo;
     return this;
+  },
+  newChannel2_not_implemented: function(aURI, aLoadInfo) {
+    throw Cr.NS_ERROR_NOT_IMPLEMENTED;
+  },
+  newChannel2_failure: function(aURI, aLoadInfo) {
+    throw Cr.NS_ERROR_FAILURE;
   },
   newChannel: function(aURI) {
     return this;
@@ -129,7 +137,7 @@ ProtocolHandler.prototype = {
                                          Ci.nsIRequest,
                                          Ci.nsIChannel,
                                          Ci.nsIFactory]),
-  classID: Components.ID("{16d594bc-d9d8-47ae-a139-ea714dc0c35c}")
+  classID: Components.ID("{accbaf4a-2fd9-47e7-8aad-8c19fc5265b5}")
 };
 
 /**
@@ -144,15 +152,42 @@ function run_test()
   registrar.registerFactory(handler.classID, "",
                             "@mozilla.org/network/protocol;1?name=" + handler.scheme,
                             handler);
-  try {
-    var ss = Cc["@mozilla.org/content/style-sheet-service;1"].
-               getService(Ci.nsIStyleSheetService);
-    ss.loadAndRegisterSheet(handler.uri, Ci.nsIStyleSheetService.AGENT_SHEET);
-    do_check_true(ss.sheetRegistered(handler.uri, Ci.nsIStyleSheetService.AGENT_SHEET));
-  } finally {
-    registrar.unregisterFactory(handler.classID, handler);
-  }
+
+  // The default implementation of NewChannel2 should work.
+  var channel = NetUtil.newChannel({
+    uri: handler.uri,
+    loadUsingSystemPrincipal: true
+  });
+  ok(channel, "channel exists");
+  channel = null;
+
+  // If the method throws NS_ERROR_NOT_IMPLEMENTED, it should fall back on newChannel()
+  handler.newChannel2 = handler.newChannel2_not_implemented;
+  channel = NetUtil.newChannel({
+    uri: handler.uri,
+    loadUsingSystemPrincipal: true
+  });
+  ok(channel, "channel exists");
+  channel = null;
+
+  // If the method is not defined (the error code will be
+  // NS_ERROR_XPC_JSOBJECT_HAS_NO_FUNCTION_NAMED) it should fall back on newChannel()
+  handler.newChannel2 = undefined;
+  channel = NetUtil.newChannel({
+    uri: handler.uri,
+    loadUsingSystemPrincipal: true
+  });
+  ok(channel, "channel exists");
+  channel = null;
+
+  // If the method simply throws an error code, it should not fall back on newChannel()
+  // so we make sure it throws.
+  handler.newChannel2 = handler.newChannel2_failure;
+  Assert.throws(() => {
+    channel = NetUtil.newChannel({
+      uri: handler.uri,
+      loadUsingSystemPrincipal: true
+    });
+  }, /Failure/, "If the channel returns an error code, it should throw");
+  ok(!channel, "channel should not exist");
 }
-
-// vim: set et ts=2 :
-
