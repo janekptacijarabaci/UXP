@@ -204,7 +204,7 @@
               accesskey="&cmd.delete.accesskey;"
               closemenu="single"
               selection="link"
-              forcehideselection="bookmark"/>
+              forcehideselection="bookmark|livemarkChild"/>
     <menuitem id="placesContext_deleteHost"
               command="placesCmd_deleteDataHost"
               label="&cmd.deleteDomainData.label;"
@@ -213,7 +213,7 @@
               selection="link|host"
               selectiontype="single"
               hideifprivatebrowsing="true"
-              forcehideselection="bookmark"/>
+              forcehideselection="bookmark|livemarkChild"/>
     <menuseparator id="placesContext_deleteSeparator"/>
     <menuitem id="placesContext_reload"
               command="placesCmd_reload"
