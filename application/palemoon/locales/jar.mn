@@ -28,6 +28,7 @@
     locale/browser/openLocation.properties         (%chrome/browser/openLocation.properties)
     locale/browser/pageInfo.dtd                    (%chrome/browser/pageInfo.dtd)
     locale/browser/pageInfo.properties             (%chrome/browser/pageInfo.properties)
+    locale/browser/palemoon.dtd                    (%chrome/browser/palemoon.dtd)
     locale/browser/quitDialog.properties           (%chrome/browser/quitDialog.properties)
     locale/browser/safeMode.dtd                    (%chrome/browser/safeMode.dtd)
     locale/browser/sanitize.dtd                    (%chrome/browser/sanitize.dtd)
@@ -55,8 +56,8 @@
     locale/browser/places/moveBookmarks.dtd        (%chrome/browser/places/moveBookmarks.dtd)
     locale/browser/feeds/subscribe.dtd              (%chrome/browser/feeds/subscribe.dtd)
     locale/browser/feeds/subscribe.properties       (%chrome/browser/feeds/subscribe.properties)
-    locale/browser/preferences/aboutPermissions.dtd          (%chrome/browser/preferences/aboutPermissions.dtd)
-    locale/browser/preferences/aboutPermissions.properties   (%chrome/browser/preferences/aboutPermissions.properties)
+    locale/browser/permissions/aboutPermissions.dtd          (%chrome/browser/permissions/aboutPermissions.dtd)
+    locale/browser/permissions/aboutPermissions.properties   (%chrome/browser/permissions/aboutPermissions.properties)
     locale/browser/preferences/advanced.dtd           (%chrome/browser/preferences/advanced.dtd)
     locale/browser/preferences/applicationManager.dtd        (%chrome/browser/preferences/applicationManager.dtd)
     locale/browser/preferences/applicationManager.properties (%chrome/browser/preferences/applicationManager.properties)
@@ -95,6 +96,3 @@
 % override chrome://global/locale/netError.dtd chrome://browser/locale/netError.dtd
 % override chrome://global/locale/appstrings.properties chrome://browser/locale/appstrings.properties
 % override chrome://mozapps/locale/downloads/settingsChange.dtd chrome://browser/locale/downloads/settingsChange.dtd
-% locale pdf.js @AB_CD@ %locale/pdfviewer/
-    locale/pdfviewer/viewer.properties             (%pdfviewer/viewer.properties)
-    locale/pdfviewer/chrome.properties             (%pdfviewer/chrome.properties)

@@ -250,6 +250,10 @@ function openLinkIn(url, where, params) {
     aRelatedToCurrent = false;
   }
 
+  // We can only do this after we're sure of what |w| will be the rest of this function.
+  // Note that if |w| is null we might have no current browser (we'll open a new window).
+  var aCurrentBrowser = params.currentBrowser || (w && w.gBrowser.selectedBrowser);
+  
   if (!w || where == "window") {
     // This propagates to window.arguments.
     // Strip referrer data when opening a new private window, to prevent
@@ -328,6 +332,7 @@ function openLinkIn(url, where, params) {
   // result in a new frontmost window (e.g. "javascript:window.open('');").
   w.focus();
 
+  let browserUsedForLoad = null;
   switch (where) {
   case "current":
     let flags = Ci.nsIWebNavigation.LOAD_FLAGS_NONE;
@@ -346,27 +351,35 @@ function openLinkIn(url, where, params) {
                                 referrerPolicy: aReferrerPolicy,
                                 postData: aPostData,
                                 }); 
+    browserUsedForLoad = aCurrentBrowser;
     break;
   case "tabshifted":
     loadInBackground = !loadInBackground;
     // fall through
   case "tab":
     let browser = w.gBrowser;
-    browser.loadOneTab(url, {
-                       referrerURI: aReferrerURI,
-                       referrerPolicy: aReferrerPolicy,
-                       charset: aCharset,
-                       postData: aPostData,
-                       inBackground: loadInBackground,
-                       allowThirdPartyFixup: aAllowThirdPartyFixup,
-                       relatedToCurrent: aRelatedToCurrent});
+    let tabUsedForLoad = browser.loadOneTab(url, {
+                           referrerURI: aReferrerURI,
+                           referrerPolicy: aReferrerPolicy,
+                           charset: aCharset,
+                           postData: aPostData,
+                           inBackground: loadInBackground,
+                           allowThirdPartyFixup: aAllowThirdPartyFixup,
+                           relatedToCurrent: aRelatedToCurrent});
+    browserUsedForLoad = tabUsedForLoad.linkedBrowser;
     break;
   }
 
-  w.gBrowser.selectedBrowser.focus();
+  // Focus the content, but only if the browser used for the load is selected.
+  if (browserUsedForLoad &&
+      browserUsedForLoad == browserUsedForLoad.getTabBrowser().selectedBrowser) {
+    browserUsedForLoad.focus();
+  }
 
   if (!loadInBackground && w.isBlankPageURL(url))
-    w.focusAndSelectUrlBar();
+    if (!w.focusAndSelectUrlBar()) {
+      console.error("Unable to focus and select address bar.")
+    }
 }
 
 // Used as an onclick handler for UI elements with link-like behavior.
@@ -549,13 +562,6 @@ function openTroubleshootingPage()
 function openFeedbackPage()
 {
   openUILinkIn(Services.prefs.getCharPref("browser.feedback.url"), "tab");
-}
-
-function buildHelpMenu()
-{
-  // Enable/disable the "Report Web Forgery" menu item.
-  if (typeof gSafeBrowsing != "undefined")
-    gSafeBrowsing.setReportPhishingMenu();
 }
 
 function isElementVisible(aElement)

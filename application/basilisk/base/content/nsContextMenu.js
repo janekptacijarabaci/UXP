@@ -85,9 +85,6 @@ nsContextMenu.prototype = {
 
     // Initialize (disable/remove) menu items.
     this.initItems();
-
-    // Register this opening of the menu with telemetry:
-    this._checkTelemetryForMenu(aXulMenu);
   },
 
   hiding: function CM_hiding() {
@@ -1348,14 +1345,11 @@ nsContextMenu.prototype = {
     }
 
     // setting up a new channel for 'right click - save link as ...'
-    // ideally we should use:
-    // * doc            - as the loadingNode, and/or
-    // * this.principal - as the loadingPrincipal
-    // for now lets use systemPrincipal to bypass mixedContentBlocker
-    // checks after redirects, see bug: 1136055
     var channel = NetUtil.newChannel({
                     uri: makeURI(linkURL),
-                    loadUsingSystemPrincipal: true
+                    loadingPrincipal: this.principal,
+                    contentPolicyType: Ci.nsIContentPolicy.TYPE_SAVEAS_DOWNLOAD,
+                    securityFlags: Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_INHERITS,
                   });
 
     if (linkDownload)
@@ -1785,65 +1779,6 @@ nsContextMenu.prototype = {
     menuItem.label = menuLabel;
     menuItem.accessKey = gNavigatorBundle.getString("contextMenuSearch.accesskey");
   },
-
-  _getTelemetryClickInfo: function(aXulMenu) {
-    this._onPopupHiding = () => {
-      aXulMenu.ownerDocument.removeEventListener("command", activationHandler, true);
-      aXulMenu.removeEventListener("popuphiding", this._onPopupHiding, true);
-      delete this._onPopupHiding;
-
-      let eventKey = [
-          this._telemetryPageContext,
-          this._telemetryHadCustomItems ? "withcustom" : "withoutcustom"
-      ];
-      let target = this._telemetryClickID || "close-without-interaction";
-      BrowserUITelemetry.registerContextMenuInteraction(eventKey, target);
-    };
-    let activationHandler = (e) => {
-      // Deal with command events being routed to command elements; figure out
-      // what triggered the event (which will have the right e.target)
-      if (e.sourceEvent) {
-        e = e.sourceEvent;
-      }
-      // Target should be in the menu (this catches using shortcuts for items
-      // not in the menu while the menu is up)
-      if (!aXulMenu.contains(e.target)) {
-        return;
-      }
-
-      // Check if this is a page menu item:
-      if (e.target.hasAttribute(PageMenuParent.GENERATEDITEMID_ATTR)) {
-        this._telemetryClickID = "custom-page-item";
-      } else {
-        this._telemetryClickID = (e.target.id || "unknown").replace(/^context-/i, "");
-      }
-    };
-    aXulMenu.ownerDocument.addEventListener("command", activationHandler, true);
-    aXulMenu.addEventListener("popuphiding", this._onPopupHiding, true);
-  },
-
-  _getTelemetryPageContextInfo: function() {
-    let rv = [];
-    for (let k of ["isContentSelected", "onLink", "onImage", "onCanvas", "onVideo", "onAudio",
-                   "onTextInput"]) {
-      if (this[k]) {
-        rv.push(k.replace(/^(?:is|on)(.)/, (match, firstLetter) => firstLetter.toLowerCase()));
-      }
-    }
-    if (!rv.length) {
-      rv.push('other');
-    }
-
-    return JSON.stringify(rv);
-  },
-
-  _checkTelemetryForMenu: function(aXulMenu) {
-    this._telemetryClickID = null;
-    this._telemetryPageContext = this._getTelemetryPageContextInfo();
-    this._telemetryHadCustomItems = this.hasPageMenu;
-    this._getTelemetryClickInfo(aXulMenu);
-  },
-
   createContainerMenu: function(aEvent) {
     return createUserContextMenu(aEvent, true,
                                  gContextMenuContentData.userContextId);
