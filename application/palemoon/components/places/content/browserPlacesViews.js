@@ -122,6 +122,16 @@ PlacesViewBase.prototype = {
     return null;
   },
 
+  get triggerNode() {
+    if (this._contextMenuShown) {
+      let anchor = this._contextMenuShown.triggerNode;
+      if (anchor) {
+        return anchor;
+      }
+    }
+    return null;
+  },
+
   get hasSelection() this.selectedNode != null,
 
   get selectedNodes() {

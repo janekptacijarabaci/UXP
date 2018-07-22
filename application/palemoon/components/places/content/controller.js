@@ -630,7 +630,23 @@ PlacesController.prototype = {
       if (!openContainerInTabsItem.hidden) {
         var containerToUse = this._view.selectedNode || this._view.result.root;
         if (PlacesUtils.nodeIsContainer(containerToUse)) {
-          if (!PlacesUtils.hasChildURIs(containerToUse)) {
+          let menuPopupContext = "placesContext";
+          let topOfHistoryMenuSel = ".recentlyClosedWindowsMenu";
+          let triggerNode = this._view.triggerNode;
+          let topOfHistoryMenu = false;
+          // A popup menu and submenu (for the menubar and appmenu)
+          let menuNode = triggerNode;
+          while (menuNode && menuNode.parentNode){
+            if (menuNode.querySelector(topOfHistoryMenuSel)) {
+              topOfHistoryMenu = true;
+              break;
+            }
+            if (menuNode.getAttribute("context") == menuPopupContext) {
+              break;
+            }
+            menuNode = menuNode.parentNode;
+          }
+          if (!PlacesUtils.hasChildURIs(containerToUse) || topOfHistoryMenu) {
             openContainerInTabsItem.disabled = true;
             // Ensure that we don't display the menu if nothing is enabled:
             usableItemCount--;
