@@ -174,7 +174,7 @@ pref("app.update.url", "https://aus.palemoon.org/?application=%PRODUCT%&version=
 pref("app.update.idletime", 180);
 
 // Whether or not we show a dialog box informing the user that the update was
-// successfully applied. This is off in Firefox by default since we show a 
+// successfully applied. This is off in Pale Moon by default since we show a 
 // upgrade start page instead! Other apps may wish to show this UI, and supply
 // a whatsNewURL field in their brand.properties that contains a link to a page
 // which tells users what's new in this new update.
@@ -498,7 +498,7 @@ pref("dom.disable_window_move_resize",            false);
 // prevent JS from monkeying with window focus, etc
 pref("dom.disable_window_flip",                   true);
 
-// Disable touch events on Desktop Firefox by default until they are properly
+// Disable touch events on Desktop Pale Moon by default until they are properly
 // supported (bug 736048)
 pref("dom.w3c_touch_events.enabled",        0);
 
@@ -1035,7 +1035,7 @@ pref("services.sync.prefs.sync.xpinstall.whitelist.required", true);
 // Enable the error console
 pref("devtools.errorconsole.enabled", true);
 
-// Whether the character encoding menu is under the main Firefox button. This
+// Whether the character encoding menu is under the main Pale Moon button. This
 // preference is a string so that localizers can alter it.
 pref("browser.menu.showCharacterEncoding", "chrome://browser/locale/browser.properties");
 

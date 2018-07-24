@@ -25,7 +25,7 @@ def ApplicationBranding():
             'appname.bmp',
             'branding.nsi',
             'document.ico',
-            'firefox.ico',
+            'palemoon.ico',
             'wizHeader.bmp',
             'wizHeaderRTL.bmp',
             'wizWatermark.bmp',
@@ -36,7 +36,7 @@ def ApplicationBranding():
             'disk.icns',
             'document.icns',
             'dsstore',
-            'firefox.icns',
+            'palemoon.icns',
         ]
     elif 'gtk' in CONFIG['MOZ_WIDGET_TOOLKIT']:
         BRANDING_FILES += [

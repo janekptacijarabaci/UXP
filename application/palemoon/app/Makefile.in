@@ -10,7 +10,7 @@ AB_CD = en-US
 DEFINES += \
   -DAB_CD=$(AB_CD) \
   -DAPP_VERSION="$(MOZ_APP_VERSION)" \
-  -DFIREFOX_ICO=\"$(DIST)/branding/firefox.ico\" \
+  -DPALEMOON_ICO=\"$(DIST)/branding/palemoon.ico\" \
   -DDOCUMENT_ICO=\"$(DIST)/branding/document.ico\" \
   -DNEWWINDOW_ICO=\"$(DIST)/branding/newwindow.ico\" \
   -DNEWTAB_ICO=\"$(DIST)/branding/newtab.ico\" \
@@ -34,8 +34,8 @@ NSDISTMODE = copy
 include $(topsrcdir)/config/config.mk
 
 ifeq ($(OS_ARCH),WINNT)
-# Rebuild firefox.exe if the manifest changes - it's included by splash.rc.
-# (this dependency should really be just for firefox.exe, not other targets)
+# Rebuild palemoon.exe if the manifest changes - it's included by splash.rc.
+# (this dependency should really be just for palemoon.exe, not other targets)
 EXTRA_DEPS += $(PROGRAM).manifest
 endif
 
@@ -90,7 +90,7 @@ tools repackage:: $(PROGRAM)
 	rsync -a --include-from='$(srcdir)/macbuild/Contents/MacOS-files.in' --exclude '*' $(DIST)/bin/ $(dist_dest)/Contents/MacOS
 	$(RM) $(dist_dest)/Contents/MacOS/$(PROGRAM)
 	rsync -aL $(PROGRAM) $(dist_dest)/Contents/MacOS
-	cp -RL $(DIST)/branding/firefox.icns $(dist_dest)/Contents/Resources/firefox.icns
+	cp -RL $(DIST)/branding/palemoon.icns $(dist_dest)/Contents/Resources/palemoon.icns
 	cp -RL $(DIST)/branding/document.icns $(dist_dest)/Contents/Resources/document.icns
 	printf APPLMOZB > $(dist_dest)/Contents/PkgInfo
 endif
