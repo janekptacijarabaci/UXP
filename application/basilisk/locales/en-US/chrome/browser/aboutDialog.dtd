@@ -5,7 +5,7 @@
 
 <!-- LOCALIZATION NOTE (update.checkForUpdatesButton.*, update.updateButton.*):
 # Only one button is present at a time.
-# The button when displayed is located directly under the Firefox version in
+# The button when displayed is located directly under the Basilisk version in
 # the about dialog (see bug 596813 for screenshots).
 -->
 <!ENTITY update.checkForUpdatesButton.label       "Check for updates">
@@ -68,7 +68,7 @@
 <!-- LOCALIZATION NOTE (update.failed.start,update.failed.linkText,update.failed.end):
      update.failed.start, update.failed.linkText, and update.failed.end all go into
      one line with linkText being wrapped in an anchor that links to a site to download
-     the latest version of Firefox (e.g. http://www.firefox.com). As this is all in
+     the latest version of Basilisk (e.g. http://www.basilisk-browser.org/). As this is all in
      one line, try to make the localized text short (see bug 596813 for screenshots). -->
 <!ENTITY update.failed.start        "Update failed. ">
 <!ENTITY update.failed.linkText     "Download the latest version">
@@ -76,7 +76,7 @@
 
 <!-- LOCALIZATION NOTE (update.manual.start,update.manual.end): update.manual.start and update.manual.end
      all go into one line and have an anchor in between with text that is the same as the link to a site
-     to download the latest version of Firefox (e.g. http://www.firefox.com). As this is all in one line,
+     to download the latest version of Basilisk (e.g. http://www.basilisk-browser.org/)). As this is all in one line,
      try to make the localized text short (see bug 596813 for screenshots). -->
 <!ENTITY update.manual.start        "Updates available at ">
 <!ENTITY update.manual.end          "">

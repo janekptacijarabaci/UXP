@@ -37,7 +37,7 @@
 @APPNAME@/Contents/Info.plist
 @APPNAME@/Contents/Library/LaunchServices
 @APPNAME@/Contents/PkgInfo
-@RESPATH@/firefox.icns
+@RESPATH@/basilisk.icns
 @RESPATH@/document.icns
 @RESPATH@/@LPROJ_ROOT@.lproj/*
 #endif
@@ -52,7 +52,7 @@
 @RESPATH@/fonts/*
 #endif
 @RESPATH@/hyphenation/*
-@RESPATH@/browser/@PREF_DIR@/firefox-l10n.js
+@RESPATH@/browser/@PREF_DIR@/basilisk-l10n.js
 #ifdef HAVE_MAKENSISU
 @BINPATH@/uninstall/helper.exe
 #endif

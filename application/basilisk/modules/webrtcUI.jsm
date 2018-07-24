@@ -553,7 +553,7 @@ function prompt(aBrowser, aRequest) {
             else {
               let brand =
                 chromeDoc.getElementById("bundle_brand").getString("brandShortName");
-              string = bundle.getFormattedString("getUserMedia.shareFirefoxWarning.message",
+              string = bundle.getFormattedString("getUserMedia.shareApplicationWarning.message",
                                                  [brand, learnMore]);
             }
             warning.innerHTML = string;

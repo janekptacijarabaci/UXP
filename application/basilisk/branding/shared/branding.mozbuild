@@ -23,9 +23,9 @@ def ApplicationBranding():
             '../shared/newwindow.ico',
             '../shared/pbmode.ico',
             'appname.bmp',
+            'basilisk.ico',
             'branding.nsi',
             'document.ico',
-            'firefox.ico',
             'wizHeader.bmp',
             'wizHeaderRTL.bmp',
             'wizWatermark.bmp',
@@ -34,9 +34,9 @@ def ApplicationBranding():
         BRANDING_FILES += [
             '../shared/dsstore',
             'background.png',
+            'basilisk.icns',
             'disk.icns',
             'document.icns',
-            'firefox.icns',
         ]
     elif 'gtk' in CONFIG['MOZ_WIDGET_TOOLKIT']:
         BRANDING_FILES += [

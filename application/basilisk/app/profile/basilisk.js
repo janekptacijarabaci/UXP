@@ -341,7 +341,7 @@ pref("browser.search.order.3",                "chrome://browser-region/locale/re
 
 // Market-specific search defaults
 // This is disabled globally, and then enabled for individual locales
-// in firefox-l10n.js (eg. it's enabled for en-US).
+// in basilisk-l10n.js (eg. it's enabled for en-US).
 pref("browser.search.geoSpecificDefaults", false);
 pref("browser.search.geoSpecificDefaults.url", "https://search.services.mozilla.com/1/%APP%/%VERSION%/%CHANNEL%/%LOCALE%/%REGION%/%DISTRIBUTION%/%DISTRIBUTION_VERSION%");
 
@@ -1022,7 +1022,7 @@ sticky_pref("lightweightThemes.selectedThemeID", "firefox-devedition@mozilla.org
 sticky_pref("lightweightThemes.selectedThemeID", "");
 #endif
 
-// Whether the character encoding menu is under the main Firefox button. This
+// Whether the character encoding menu is under the main Basilisk button. This
 // preference is a string so that localizers can alter it.
 pref("browser.menu.showCharacterEncoding", "chrome://browser/locale/browser.properties");
 
@@ -1084,11 +1084,11 @@ pref("full-screen-api.enabled", true);
 // (this pref has no effect if more than 6 hours have passed since the last crash)
 pref("toolkit.startup.max_resumed_crashes", 3);
 
-// Completely disable pdf.js as an option to preview pdfs within firefox.
+// Completely disable pdf.js as an option to preview pdfs within Basilisk.
 // Note: if this is not disabled it does not necessarily mean pdf.js is the pdf
 // handler just that it is an option.
 pref("pdfjs.disabled", false);
-// Used by pdf.js to know the first time firefox is run with it installed so it
+// Used by pdf.js to know the first time Basilisk is run with it installed so it
 // can become the default pdf viewer.
 pref("pdfjs.firstRun", true);
 // The values of preferredAction and alwaysAskBeforeHandling before pdf.js
@@ -1114,7 +1114,7 @@ pref("security.insecure_field_warning.contextual.enabled", true);
 pref("security.cert_pinning.enforcement_level", 1);
 
 
-// Override the Gecko-default value of false for Firefox.
+// Override the Gecko-default value of false for Basilisk.
 pref("plain_text.wrap_long_lines", true);
 
 // If this turns true, Moz*Gesture events are not called stopPropagation()
@@ -1240,7 +1240,7 @@ pref("media.gmp.trial-create.enabled", true);
 
 // Note: when media.gmp-*.visible is true, provided we're running on a
 // supported platform/OS version, the corresponding CDM appears in the
-// plugins list, Firefox will download the GMP/CDM if enabled, and our
+// plugins list, Basilisk will download the GMP/CDM if enabled, and our
 // UI to re-enable EME prompts the user to re-enable EME if it's disabled
 // and script requests EME. If *.visible is false, we won't show the UI
 // to enable the CDM if its disabled; it's as if the keysystem is completely
@@ -1250,7 +1250,7 @@ pref("media.gmp.trial-create.enabled", true);
 pref("media.gmp-eme-adobe.visible", true);
 // When Adobe EME is enabled in the build system, we don't actually enable
 // the plugin by default, so that it doesn't download and install by default.
-// When Adobe EME is first used, Firefox will prompt the user to enable it,
+// When Adobe EME is first used, Basilisk will prompt the user to enable it,
 // and then download the CDM.
 pref("media.gmp-eme-adobe.enabled", false);
 #endif
