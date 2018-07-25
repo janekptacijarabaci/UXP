@@ -293,6 +293,14 @@ HandlerInfoWrapper.prototype = {
   },
 
   set preferredAction(aNewValue) {
+    // If the action is to use the plugin,
+    // we must set the preferred action to "save to disk".
+    // But only if it's not currently the preferred action.
+    if ((aNewValue == kActionUsePlugin) &&
+        (this.preferredAction != Ci.nsIHandlerInfo.saveToDisk)) {
+      aNewValue = Ci.nsIHandlerInfo.saveToDisk;
+    }
+
     // We don't modify the preferred action if the new action is to use a plugin
     // because handler info objects don't understand our custom "use plugin"
     // value.  Also, leaving it untouched means that we can automatically revert
@@ -1368,7 +1376,7 @@ var gApplicationsPane = {
 
     {
       var askMenuItem = document.createElement("menuitem");
-      askMenuItem.setAttribute("alwaysAsk", "true");
+      askMenuItem.setAttribute("action", Ci.nsIHandlerInfo.alwaysAsk);
       let label;
       if (isFeedType(handlerInfo.type))
         label = this._prefsBundle.getFormattedString("previewInApp",
@@ -1614,10 +1622,7 @@ var gApplicationsPane = {
     var typeItem = this._list.selectedItem;
     var handlerInfo = this._handledTypes[typeItem.type];
 
-    if (aActionItem.hasAttribute("alwaysAsk")) {
-      handlerInfo.alwaysAskBeforeHandling = true;
-    }
-    else if (aActionItem.hasAttribute("action")) {
+    if (aActionItem.hasAttribute("action")) {
       let action = parseInt(aActionItem.getAttribute("action"));
 
       // Set the plugin state if we're enabling or disabling a plugin.
@@ -1636,7 +1641,10 @@ var gApplicationsPane = {
         handlerInfo.preferredApplicationHandler = aActionItem.handlerApp;
 
       // Set the "always ask" flag.
-      handlerInfo.alwaysAskBeforeHandling = false;
+      if (action == Ci.nsIHandlerInfo.alwaysAsk)
+        handlerInfo.alwaysAskBeforeHandling = true;
+      else
+        handlerInfo.alwaysAskBeforeHandling = false;
 
       // Set the preferred action.
       handlerInfo.preferredAction = action;
