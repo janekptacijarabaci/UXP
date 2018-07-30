@@ -4678,6 +4678,10 @@ void HTMLMediaElement::PlaybackEnded()
   // We changed state which can affect AddRemoveSelfReference
   AddRemoveSelfReference();
 
+  // To prevent auto-play next video while media.autoplay.enabled is set to
+  // FALSE.
+  mHasUserInteraction = false;
+
   NS_ASSERTION(!mDecoder || mDecoder->IsEnded(),
                "Decoder fired ended, but not in ended state");
 
